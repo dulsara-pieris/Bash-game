@@ -73,8 +73,9 @@ handle_input() {
 get_random_number() {
   min=$1
   max=$2
-  # shellcheck disable=3028
-  printf $((min + RANDOM % (1 + max - min)))
+  range=$((max - min + 1))
+  num=$(od -An -N2 -tu2 /dev/urandom 2>/dev/null | tr -d ' ')
+  printf "%d" $((min + num % range))
 }
 
 show_alternate_screen() {
@@ -140,18 +141,27 @@ clear_ship() {
 
 
 spawn_asteroid() {
-  if [ "$asteroid_count" -lt 8 ]; then
-    line=$(get_random_number 3 $((NUM_LINES - 2)))
-    column=$((NUM_COLUMNS - 2))
-    size=$(get_random_number 1 3)
-    
-    asteroid_count=$((asteroid_count + 1))
-    eval "asteroid_${asteroid_count}_line=$line"
-    eval "asteroid_${asteroid_count}_col=$column"
-    eval "asteroid_${asteroid_count}_size=$size"
-    eval "asteroid_${asteroid_count}_active=1"
-  fi
+  i=1
+  while [ $i -le 8 ]; do
+    eval "active=\${asteroid_${i}_active:-0}"
+
+    if [ "$active" = 0 ]; then
+      line=$(get_random_number 3 $((NUM_LINES - 2)))
+      column=$((NUM_COLUMNS - 2))
+      size=$(get_random_number 1 3)
+
+      eval "asteroid_${i}_line=$line"
+      eval "asteroid_${i}_col=$column"
+      eval "asteroid_${i}_size=$size"
+      eval "asteroid_${i}_active=1"
+
+      [ "$i" -gt "$asteroid_count" ] && asteroid_count=$i
+      return
+    fi
+    i=$((i + 1))
+  done
 }
+
 
 spawn_crystal() {
   if [ "$crystal_active" = 0 ]; then
@@ -616,39 +626,45 @@ move_cursor $center_line $center_col
 printf "                           "
 
 # Game loop
-# Game loop
 while true; do
   if [ "$paused" = 0 ]; then
-    sleep 0.002
+    sleep 0.03
+
     clear_ship
     handle_input
-      # Draw
-    if [ $((frame % 10)) = 0 ]; then
+
+    # Background
+    if (( frame % 10 == 0 )); then
       draw_stars
     fi
-    if [ $((frame % 3)) = 0 ]; then
+
+    # Spawning
+    if (( frame % 5 == 0 )); then
       spawn_asteroid
     fi
-    if [ $((frame % 5)) = 0 ]; then
+
+    if (( frame % 20 == 0 )); then
       spawn_crystal
       spawn_powerup
     fi
+
+    # Movement
     move_asteroids
     move_crystal
     move_powerup
     move_laser
 
-    if [ $((frame % 30)) = 0 ]; then
-      spawn_asteroid
-      move_asteroids
-    fi
-
+    # Logic
     check_laser_hits
     check_collisions
     update_timers
 
+    # Draw
     draw_ship
     draw_hud
-    frame=$((frame + 1))
+
+    ((frame++))
   fi
+done
+
 done
