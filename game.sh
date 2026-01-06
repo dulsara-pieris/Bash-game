@@ -630,19 +630,6 @@ on_exit() {
     
     # Save to local profile file
     save_profile
-    
-    # --- CLOUD SYNC SECTION ---
-    safe_name=$(echo "$player_name" | tr -d '[:space:][:punct:]')
-    
-    # Send only the score to your KVdb bucket
-    # -m 5: timeout after 5 seconds
-    # -s: silent mode
-    # -o /dev/null: hide technical output
-    # --data-raw: ensure the number is sent exactly
-    curl -s -m 5 -o /dev/null -X POST \
-         --data-raw "$score" \
-         "https://kvdb.io/HKnPR6HRekZq7J327tEQfa/player_$safe_name"
-    # --- END CLOUD SYNC ---
   fi
   
   # 2. Restore Terminal State
