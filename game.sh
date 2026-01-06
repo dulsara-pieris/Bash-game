@@ -6,7 +6,7 @@
 
 
 #profile file
-SAVE_DIR="$HOME/.star_runner"
+SAVE_DIR="./data/players"
 PROFILE_FILE="$SAVE_DIR/player_profile"
 mkdir -p "$SAVE_DIR"
 
