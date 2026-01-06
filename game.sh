@@ -6,7 +6,7 @@
 
 
 #profile file
-SAVE_DIR="./data/players"
+SAVE_DIR="$HOME/.star_runner"
 PROFILE_FILE="$SAVE_DIR/player_profile"
 mkdir -p "$SAVE_DIR"
 
@@ -96,26 +96,23 @@ init_profile() {
     total_asteroids=0
 
     # Save initial profile
-save_profile() {
-  PROFILE_FILE="$SAVE_DIR/${player_name}.profile"
-  cat > "$PROFILE_FILE" << EOF
-  player_name="$player_name"
-  player_birth_year="$player_birth_year"
-  player_gender="$player_gender"
-  player_title="$player_title"
-  high_score=$high_score
-  total_crystals=$total_crystals
-  total_asteroids=$total_asteroids
-  EOF
+    save_profile
+    printf "\n${COLOR_GREEN}Profile created successfully! Welcome, ${player_title} ${player_name} (Age: ${player_age})!${COLOR_NEUTRAL}\n\n"
+    sleep 2
+  else
+    load_profile
+    # Calculate current age from birth year
+    current_year=2026
+    player_age=$((current_year - player_birth_year))
+  fi
 }
+
 load_profile() {
-  PROFILE_FILE="$SAVE_DIR/${player_name}.profile"
   if [ -f "$PROFILE_FILE" ]; then
     # shellcheck disable=SC1090
     . "$PROFILE_FILE"
   fi
 }
-
 
 
 # Constants
