@@ -10,30 +10,94 @@ SAVE_DIR="$HOME/.star_runner"
 PROFILE_FILE="$SAVE_DIR/player_profile"
 mkdir -p "$SAVE_DIR"
 
+save_profile() {
+  cat > "$PROFILE_FILE" << EOF
+player_name="$player_name"
+player_age="$player_age"
+player_gender="$player_gender"
+player_title="$player_title"
+high_score="$high_score"
+total_crystals="$total_crystals"
+total_asteroids="$total_asteroids"
+EOF
+}
+
 init_profile() {
   if [ ! -f "$PROFILE_FILE" ]; then
-    echo "Welcome, pilot! Let's create your profile."
+    printf "${COLOR_CYAN}Welcome, pilot! Let's create your profile.${COLOR_NEUTRAL}\n\n"
     
-    read -rp "Enter your name: " player_name
-    read -rp "Enter your age: " player_age
-    read -rp "Enter your gender: " player_gender
+    # Validate name input
+    while true; do
+      printf "Enter your name: "
+      read -r player_name
+      
+      if [ -n "$player_name" ]; then
+        break
+      else
+        printf "${COLOR_RED}Name cannot be empty!${COLOR_NEUTRAL}\n"
+      fi
+    done
+    
+    # Validate age input
+    while true; do
+      printf "Enter your age: "
+      read -r player_age
+      
+      # Check if age is a valid number
+      case $player_age in
+        ''|*[!0-9]*)
+          printf "${COLOR_RED}Invalid age! Please enter a valid number.${COLOR_NEUTRAL}\n"
+          ;;
+        *)
+          if [ "$player_age" -gt 0 ] && [ "$player_age" -lt 150 ]; then
+            break
+          else
+            printf "${COLOR_RED}Age must be between 1 and 149.${COLOR_NEUTRAL}\n"
+          fi
+          ;;
+      esac
+    done
+    
+    # Validate gender input
+    while true; do
+      printf "Enter your gender (M/F): "
+      read -r player_gender_input
+      
+      case $player_gender_input in
+        [Mm]|[Mm]ale)
+          player_gender="Male"
+          player_title="Mr."
+          break
+          ;;
+        [Ff]|[Ff]emale)
+          player_gender="Female"
+          player_title="Mrs."
+          break
+          ;;
+        *)
+          printf "${COLOR_RED}Invalid input! Please enter M for Male or F for Female.${COLOR_NEUTRAL}\n"
+          ;;
+      esac
+    done
 
-    # Default game stats
-    score=0
-    crystals_collected=0
-    asteroids_destroyed=0
-    ammo=20
+    # Default profile stats
+    high_score=0
+    total_crystals=0
+    total_asteroids=0
 
     # Save initial profile
     save_profile
+    printf "\n${COLOR_GREEN}Profile created successfully! Welcome, ${player_title} ${player_name}!${COLOR_NEUTRAL}\n\n"
+    sleep 2
   else
     load_profile
   fi
 }
+
 load_profile() {
   if [ -f "$PROFILE_FILE" ]; then
     # shellcheck disable=SC1090
-    source "$PROFILE_FILE"
+    . "$PROFILE_FILE"
   fi
 }
 
@@ -541,6 +605,16 @@ toggle_pause() {
 }
 
 on_exit() {
+  # Update profile with new high score if applicable
+  if [ -n "$player_name" ]; then
+    if [ "$score" -gt "$high_score" ]; then
+      high_score=$score
+    fi
+    total_crystals=$((total_crystals + crystals_collected))
+    total_asteroids=$((total_asteroids + asteroids_destroyed))
+    save_profile
+  fi
+  
   hide_alternate_screen
   show_cursor
   stty icanon echo
@@ -560,16 +634,20 @@ EOF
   printf "\n${COLOR_MAGENTA}╔═══════════════════════════════════════════════════════╗${COLOR_NEUTRAL}\n"
   printf "${COLOR_MAGENTA}║${COLOR_NEUTRAL}              MISSION OVER - STATS                     ${COLOR_MAGENTA}║${COLOR_NEUTRAL}\n"
   printf "${COLOR_MAGENTA}╚═══════════════════════════════════════════════════════╝${COLOR_NEUTRAL}\n\n"
-  printf "  ${COLOR_YELLOW}⚡ Final Score:${COLOR_NEUTRAL} $score\n"
+  
+  printf "  ${COLOR_YELLOW}⚡ This Mission Score:${COLOR_NEUTRAL} $score\n"
   printf "  ${COLOR_CYAN}◇ Crystals Collected:${COLOR_NEUTRAL} $crystals_collected\n"
-  printf "  ${COLOR_RED}◆ Asteroids Destroyed:${COLOR_NEUTRAL} $asteroids_destroyed\n"
+  printf "  ${COLOR_RED}◆ Asteroids Destroyed:${COLOR_NEUTRAL} $asteroids_destroyed\n\n"
+  
+  if [ -n "$player_name" ]; then
+    printf "  ${COLOR_CYAN}👤 Pilot:${COLOR_NEUTRAL} ${COLOR_GREEN}${player_title} ${player_name}${COLOR_NEUTRAL} (Age: $player_age, Gender: $player_gender)\n\n"
+    printf "  ${COLOR_MAGENTA}📊 Career Stats:${COLOR_NEUTRAL}\n"
+    printf "  ${COLOR_YELLOW}🏆 High Score:${COLOR_NEUTRAL} $high_score\n"
+    printf "  ${COLOR_CYAN}💎 Total Crystals:${COLOR_NEUTRAL} $total_crystals\n"
+    printf "  ${COLOR_RED}💥 Total Asteroids:${COLOR_NEUTRAL} $total_asteroids\n\n"
+  fi
+  
   printf "  ${COLOR_GREEN}☆ Rank:${COLOR_NEUTRAL} "
-  printf ""
-  printf "Profile"
-  printf "${COLOR_CYAN}Pilot: ${COLOR_GREEN}$player_name${COLOR_NEUTRAL}\n"
-  printf "${COLOR_YELLOW}Age: ${COLOR_NEUTRAL}$player_age  ${COLOR_MAGENTA}Gender: ${COLOR_NEUTRAL}$player_gender\n"
-  printf "${COLOR_YELLOW}Score: ${COLOR_NEUTRAL}$score  Crystals: ${COLOR_CYAN}$crystals_collected${COLOR_NEUTRAL}\n"
-
   
   if [ "$score" -lt 100 ]; then
     printf "${COLOR_WHITE}Cadet${COLOR_NEUTRAL}\n"
@@ -624,6 +702,10 @@ shield_timer=0
 super_mode_active=0
 super_timer=0
 frame=0
+score=0
+crystals_collected=0
+asteroids_destroyed=0
+ammo=20
 
 while :; do
   case $1 in
@@ -644,6 +726,9 @@ while :; do
   esac
   shift
 done
+
+# Initialize or load profile BEFORE changing terminal settings
+init_profile
 
 stty -icanon -echo time $TURN_DURATION min 0
 
@@ -670,16 +755,19 @@ while true; do
     handle_input
 
     # Background
-    if (( frame % 10 == 0 )); then
+    frame_mod_10=$((frame % 10))
+    if [ "$frame_mod_10" -eq 0 ]; then
       draw_stars
     fi
 
     # Spawning
-    if (( frame % 3 == 0 )); then
+    frame_mod_3=$((frame % 3))
+    if [ "$frame_mod_3" -eq 0 ]; then
       spawn_asteroid
     fi
 
-    if (( frame % 20 == 0 )); then
+    frame_mod_20=$((frame % 20))
+    if [ "$frame_mod_20" -eq 0 ]; then
       spawn_crystal
       spawn_powerup
     fi
@@ -699,8 +787,6 @@ while true; do
     draw_ship
     draw_hud
 
-    ((frame++))
+    frame=$((frame + 1))
   fi
-done
-
 done
