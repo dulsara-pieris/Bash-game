@@ -13,7 +13,7 @@ mkdir -p "$SAVE_DIR"
 save_profile() {
   cat > "$PROFILE_FILE" << EOF
 player_name="$player_name"
-player_age="$player_age"
+player_birth_year="$player_birth_year"
 player_gender="$player_gender"
 player_title="$player_title"
 high_score="$high_score"
@@ -38,21 +38,23 @@ init_profile() {
       fi
     done
     
-    # Validate age input
+    # Validate birth year input
+    current_year=2026
     while true; do
-      printf "Enter your age: "
-      read -r player_age
+      printf "Enter your birth year (e.g., 2000): "
+      read -r player_birth_year
       
-      # Check if age is a valid number
-      case $player_age in
+      # Check if birth year is a valid number
+      case $player_birth_year in
         ''|*[!0-9]*)
-          printf "${COLOR_RED}Invalid age! Please enter a valid number.${COLOR_NEUTRAL}\n"
+          printf "${COLOR_RED}Invalid year! Please enter a valid number.${COLOR_NEUTRAL}\n"
           ;;
         *)
-          if [ "$player_age" -gt 0 ] && [ "$player_age" -lt 150 ]; then
+          if [ "$player_birth_year" -ge 1900 ] && [ "$player_birth_year" -le "$current_year" ]; then
+            player_age=$((current_year - player_birth_year))
             break
           else
-            printf "${COLOR_RED}Age must be between 1 and 149.${COLOR_NEUTRAL}\n"
+            printf "${COLOR_RED}Birth year must be between 1900 and ${current_year}.${COLOR_NEUTRAL}\n"
           fi
           ;;
       esac
@@ -95,10 +97,13 @@ init_profile() {
 
     # Save initial profile
     save_profile
-    printf "\n${COLOR_GREEN}Profile created successfully! Welcome, ${player_title} ${player_name}!${COLOR_NEUTRAL}\n\n"
+    printf "\n${COLOR_GREEN}Profile created successfully! Welcome, ${player_title} ${player_name} (Age: ${player_age})!${COLOR_NEUTRAL}\n\n"
     sleep 2
   else
     load_profile
+    # Calculate current age from birth year
+    current_year=2026
+    player_age=$((current_year - player_birth_year))
   fi
 }
 
@@ -376,11 +381,11 @@ move_powerup() {
 }
 
 fire_weapon() {
-  if [ "$laser_active" = 0 ] && [ "$ammo" -gt 0 ]; then
+  if (( laser_active == 0 && ammo > 0 )); then
     laser_line=$ship_line
     laser_col=$((ship_column + 2))
     laser_active=1
-    ammo=$((ammo - 1))
+    ((ammo--))
   fi
 }
 
@@ -648,7 +653,9 @@ EOF
   printf "  ${COLOR_RED}◆ Asteroids Destroyed:${COLOR_NEUTRAL} $asteroids_destroyed\n\n"
   
   if [ -n "$player_name" ]; then
-    printf "  ${COLOR_CYAN}👤 Pilot:${COLOR_NEUTRAL} ${COLOR_GREEN}${player_title} ${player_name}${COLOR_NEUTRAL} (Age: $player_age, Gender: $player_gender)\n\n"
+    current_year=2026
+    player_age=$((current_year - player_birth_year))
+    printf "  ${COLOR_CYAN}👤 Pilot:${COLOR_NEUTRAL} ${COLOR_GREEN}${player_title} ${player_name}${COLOR_NEUTRAL} (Age: $player_age, Born: $player_birth_year, Gender: $player_gender)\n\n"
     printf "  ${COLOR_MAGENTA}📊 Career Stats:${COLOR_NEUTRAL}\n"
     printf "  ${COLOR_YELLOW}🏆 High Score:${COLOR_NEUTRAL} $high_score\n"
     printf "  ${COLOR_CYAN}💎 Total Crystals:${COLOR_NEUTRAL} $total_crystals\n"
