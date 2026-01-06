@@ -157,21 +157,25 @@ handle_input() {
   case $key in
     A) # Up
       if [ "$ship_line" -gt 3 ]; then
+        clear_ship
         ship_line=$((ship_line - 1))
       fi
       ;;
     B) # Down
       if [ "$ship_line" -lt $((NUM_LINES - 2)) ]; then
+        clear_ship
         ship_line=$((ship_line + 1))
       fi
       ;;
     C) # Right
       if [ "$ship_column" -lt $((NUM_COLUMNS - 10)) ]; then
+        clear_ship
         ship_column=$((ship_column + 2))
       fi
       ;;
     D) # Left
       if [ "$ship_column" -gt 5 ]; then
+        clear_ship
         ship_column=$((ship_column - 2))
       fi
       ;;
@@ -244,33 +248,30 @@ draw_ship() {
 }
 
 clear_ship() {
-  move_cursor "$ship_line" $((ship_column - 3))
-  printf "      "
+  move_cursor "$ship_line" "$ship_column"
+  if [ "$shield_active" = 1 ] || [ "$super_mode_active" = 1 ]; then
+    printf "   "
+  else
+    printf " "
+  fi
 }
 
 
 
 
 spawn_asteroid() {
-  i=1
-  while [ $i -le 8 ]; do
-    eval "active=\${asteroid_${i}_active:-0}"
+  # Increase total asteroids
+  asteroid_count=$((asteroid_count + 1))
+  i=$asteroid_count
 
-    if [ "$active" = 0 ]; then
-      line=$(get_random_number 3 $((NUM_LINES - 2)))
-      column=$((NUM_COLUMNS - 2))
-      size=$(get_random_number 1 3)
+  line=$(get_random_number 10 $((NUM_LINES - 10)))
+  column=$((NUM_COLUMNS - 1))
+  size=$(get_random_number 1 3)
 
-      eval "asteroid_${i}_line=$line"
-      eval "asteroid_${i}_col=$column"
-      eval "asteroid_${i}_size=$size"
-      eval "asteroid_${i}_active=1"
-
-      [ "$i" -gt "$asteroid_count" ] && asteroid_count=$i
-      return
-    fi
-    i=$((i + 1))
-  done
+  eval "asteroid_${i}_line=$line"
+  eval "asteroid_${i}_col=$column"
+  eval "asteroid_${i}_size=$size"
+  eval "asteroid_${i}_active=1"
 }
 
 
@@ -770,9 +771,7 @@ printf "                           "
 # Game loop
 while true; do
   if [ "$paused" = 0 ]; then
-    sleep 0.03
 
-    clear_ship
     handle_input
 
     # Background
