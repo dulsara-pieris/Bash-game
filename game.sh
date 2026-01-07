@@ -68,27 +68,34 @@ init_profile() {
       esac
     done
     
-    # Validate gender input
+        # Validate gender input
     while true; do
       printf "Enter your gender (M/F): "
       read -r player_gender_input
       
       case $player_gender_input in
         [Mm]|[Mm]ale)
-          player_gender="Male"
-          if [ "$player_age" -lt 18 ]; then
+          if [ "$player_age" -lt 5 ]; then
+            player_title="Baby"
+          elif [ "$player_age" -lt 18 ]; then
             player_title="Boy"
-          else
+          elif [ "$player_age" -lt 60 ]; then
             player_title="Mr."
+          else
+            player_title="Grand"
           fi
           break
           ;;
         [Ff]|[Ff]emale)
           player_gender="Female"
-          if [ "$player_age" -lt 18 ]; then
+          if [ "$player_age" -lt 5 ]; then
+            player_title="Baby"
+          elif [ "$player_age" -lt 18 ]; then
             player_title="Girl"
+          elif [ "$player_age" -lt 60 ]; then
+            player_title="Mrs"
           else
-            player_title="Mrs."
+            player_title="Granny"
           fi
           break
           ;;
@@ -97,6 +104,7 @@ init_profile() {
           ;;
       esac
     done
+
 
     # Default profile stats
     high_score=0
@@ -734,7 +742,7 @@ spawn_asteroid() {
 
 spawn_crystal() {
   if [ "$crystal_active" = 0 ]; then
-    chance=$(get_random_number 1 5)
+    chance=$(get_random_number 1 2)
     if [ "$chance" = 1 ]; then
       line=$(get_random_number 3 $((NUM_LINES - 2)))
       column=$((NUM_COLUMNS - 2))
@@ -1047,7 +1055,7 @@ check_collisions() {
       if [ "$ship_column" -ge $((crystal_col - 1)) ] && [ "$ship_column" -le $((crystal_col + 1)) ]; then
         crystal_active=0
         score=$((score + 50))
-        crystals_collected=$((crystals_collected + 3))
+        crystals_collected=$((crystals_collected + 1))
         ammo=$((ammo + 5))
       fi
     fi
