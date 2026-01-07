@@ -742,7 +742,7 @@ spawn_asteroid() {
 
 spawn_crystal() {
   if [ "$crystal_active" = 0 ]; then
-    chance=$(get_random_number 1 2)
+    chance=$(get_random_number 1 1)
     if [ "$chance" = 1 ]; then
       line=$(get_random_number 3 $((NUM_LINES - 2)))
       column=$((NUM_COLUMNS - 2))
@@ -755,7 +755,7 @@ spawn_crystal() {
 
 spawn_powerup() {
   if [ "$powerup_active" = 0 ]; then
-    chance=$(get_random_number 1 10)
+    chance=$(get_random_number 1 8)
     if [ "$chance" = 1 ]; then
       line=$(get_random_number 3 $((NUM_LINES - 2)))
       column=$((NUM_COLUMNS - 2))
@@ -1054,7 +1054,7 @@ check_collisions() {
     if [ "$ship_line" = "$crystal_line" ]; then
       if [ "$ship_column" -ge $((crystal_col - 1)) ] && [ "$ship_column" -le $((crystal_col + 1)) ]; then
         crystal_active=0
-        score=$((score + 50))
+        score=$((score + 25))
         crystals_collected=$((crystals_collected + 1))
         ammo=$((ammo + 5))
       fi
