@@ -1,57 +1,151 @@
-SYNAPSNEX OSS-Protection License (SOPL) v1.0
+SYNAPSNEX Attribution‑Preserving Source License (SAPL) v1.3
 
 Copyright (c) 2026 Dulsara Pieris
 
-Licensed under the SYNAPSNEX OSS-Protection License (SOPL) v1.0
+Licensed under the SYNAPSNEX Attribution‑Preserving Source License (SAPL) v1.3
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to use, 
-study, modify, use commercially, and redistribute the Software, subject to 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+study, modify, use commercially, and redistribute the Software, subject to
 the following conditions:
 
-1. Attribution
-   All use, modification, or redistribution of the Software must include clear 
-   credit to the original author:
-   "Original project by Dulsara Pieris"
 
-2. Modification
-   Modifications are permitted under the following conditions:
-   a) Modified versions must be clearly marked as modified.
-   b) Modified versions must not claim to be the original Software.
-   c) Any modifications must include **credit to the modifier**, which must be 
-      displayed in the software itself (e.g., printed in the console, splash 
-      screen, UI, or other visible output) so that users can see who made the changes.
+1. Irrevocable Original Authorship
 
-3. Open Source Protection
-   The Software, or any modified version, may not be used to:
-   a) Defame, falsely blame, or intentionally misrepresent open-source software,
-      projects, developers, or communities.
-   b) Spread false or misleading claims about open-source software.
-   c) Damage the reputation of open-source ecosystems through deceptive or 
-      malicious modifications.
+1.1 The original author of this Software is Dulsara Pieris. This fact is
+permanent, factual, and irrevocable.
 
-   Note: Criticism, comparison, or analysis of closed-source or proprietary 
-   software is explicitly permitted.
+1.2 The original author’s credit MUST be preserved in all copies of the
+Software, whether modified or unmodified.
 
-4. Redistribution
-   Redistribution of the Software, whether modified or unmodified, is allowed 
-   only if:
-   a) This license text is included, and
-   b) Proper attribution to the original author and any modifiers is maintained, 
-      including visible attribution in the software output for any modifications.
+1.3 The original author’s credit MUST NOT be removed, altered, minimized,
+obscured, replaced, or misrepresented under any circumstances.
 
-5. Trademark & Naming
-   The name of the original project and the author's name may not be used to 
-   endorse or promote derivative products without explicit permission.
+1.4 The original author’s credit MUST appear before any other contributor
+or modifier credits.
 
-6. Relicensing
-   The Software, or any modified version, may not be redistributed under a 
-   different license. It must remain licensed under the SYNAPSNEX OSS-Protection 
-   License (SOPL) v1.0, and all obligations, including attribution and 
-   visible credit requirements, must be preserved.
+1.5 Any attempt to remove, obscure, downgrade, or misrepresent the original
+authorship constitutes a material violation of this license and results in
+automatic termination of all granted rights.
 
 
-Disclaimer
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-   IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR 
-   OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+2. Mandatory Attribution Placement
+
+2.1 Attribution to the original author MUST appear in ALL of the following:
+
+   a) This LICENSE file  
+   b) The README or primary documentation  
+   c) An AUTHORS or CREDITS file  
+
+2.2 Attribution MUST ALSO appear in at least one user-accessible surface
+if such a surface exists, including but not limited to:
+
+   - CLI output such as --version, --about, or startup messages  
+   - An About dialog or settings screen  
+   - A splash screen, footer, or visible UI element  
+   - Console output on first execution  
+
+2.3 If the Software has no user-visible interface or output, attribution
+MUST be included in public documentation, package metadata, or repository
+descriptions.
+
+2.4 Lack of a user interface, headless operation, internal use, or backend
+deployment SHALL NOT be used as justification to remove or hide attribution.
+
+
+3. Modification and Modifier Credit
+
+3.1 Any modification, regardless of size or scope, MUST be clearly marked
+as a modification.
+
+3.2 Modified versions MUST identify the modifier(s) by name and date of
+modification.
+
+3.3 Modifier credit MUST be presented alongside, but never more prominently
+than, the original author’s credit.
+
+3.4 Modified versions MUST NOT claim to be the original Software and MUST NOT
+imply original authorship by anyone other than the original author.
+
+3.5 Anonymous or pseudonymous modification is NOT permitted for redistribution.
+
+
+4. Preservation of Authorship History
+
+4.1 AUTHORS, CREDITS, and CHANGELOG files are considered integral parts of
+the Software.
+
+4.2 These files MUST be preserved in all redistributions.
+
+4.3 Existing authorship entries MUST NOT be removed, reordered, rewritten,
+or reset.
+
+4.4 New contributors or modifiers MAY add entries, but MUST NOT alter or
+remove existing historical records.
+
+4.5 Chronological authorship history MUST be maintained.
+
+
+5. Naming, Identity, and Representation
+
+5.1 Derivative works MUST NOT use the original project name without explicit
+written permission from the original author.
+
+5.2 Derivative works MUST include the statement:
+"Derived from software originally created by Dulsara Pieris"
+
+5.3 Repository descriptions, package listings, and public distributions
+MUST include original author attribution in their descriptions.
+
+5.4 It is strictly prohibited to claim sole authorship, independent creation,
+or origin by any party other than the original author.
+
+
+6. Binary, Obfuscation, and Compilation Protection
+
+6.1 Distribution in compiled, binary, minified, or obfuscated form is
+permitted only if all attribution requirements of this license remain fully
+accessible.
+
+6.2 Attribution MUST be included in documentation distributed with binaries.
+
+6.3 Removal of attribution through compilation, stripping, compression,
+or obfuscation constitutes a license violation.
+
+
+7. License Continuity and Relicensing
+
+7.1 The Software and all derivative works MUST remain licensed under the
+SYNAPSNEX Attribution‑Preserving Source License (SAPL) v1.3.
+
+7.2 Relicensing, sublicensing, or license substitution is NOT permitted.
+
+7.3 Aggregation, wrapping, embedding, or inclusion within larger works does
+NOT remove or reduce the obligations of this license.
+
+
+8. Enforcement, Termination, and Cure
+
+8.1 Any violation of this license automatically terminates all rights granted
+under it.
+
+8.2 Rights MAY be reinstated only if:
+   a) The violation is fully corrected
+   b) All required attribution is restored
+   c) Any public misrepresentation is publicly corrected
+
+8.3 Continued use, modification, or distribution after termination
+constitutes unauthorized use.
+
+
+9. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
