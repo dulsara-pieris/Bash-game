@@ -1259,19 +1259,79 @@ EOF
   fi
   
   printf "  ${COLOR_GREEN}☆ Rank:${COLOR_NEUTRAL} "
-  
-  if [ "$score" -lt 100 ]; then
-    printf "${COLOR_WHITE}Cadet${COLOR_NEUTRAL}\n"
-  elif [ "$score" -lt 300 ]; then
-    printf "${COLOR_GREEN}Pilot${COLOR_NEUTRAL}\n"
-  elif [ "$score" -lt 500 ]; then
-    printf "${COLOR_CYAN}Commander${COLOR_NEUTRAL}\n"
-  elif [ "$score" -lt 1000 ]; then
-    printf "${COLOR_MAGENTA}Captain${COLOR_NEUTRAL}\n"
-  else
-    printf "${COLOR_YELLOW}Admiral${COLOR_NEUTRAL}\n"
-  fi
-  
+if [ "$score" -lt 20 ]; then
+  printf "${COLOR_WHITE}Street Spectator${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 40 ]; then
+  printf "${COLOR_WHITE}Neon Bystander${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 65 ]; then
+  printf "${COLOR_WHITE}Signal Listener${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 90 ]; then
+  printf "${COLOR_WHITE}Binary Initiate${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 120 ]; then
+  printf "${COLOR_GREEN}Cadet${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 155 ]; then
+  printf "${COLOR_GREEN}Data Trainee${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 195 ]; then
+  printf "${COLOR_GREEN}Grid Operator${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 240 ]; then
+  printf "${COLOR_CYAN}Packet Runner${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 300 ]; then
+  printf "${COLOR_CYAN}Neon Pilot${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 370 ]; then
+  printf "${COLOR_CYAN}Signal Breaker${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 450 ]; then
+  printf "${COLOR_BLUE}Void Skimmer${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 550 ]; then
+  printf "${COLOR_BLUE}Cyber Ace${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 680 ]; then
+  printf "${COLOR_BLUE}Neural Navigator${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 830 ]; then
+  printf "${COLOR_MAGENTA}System Officer${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 1000 ]; then
+  printf "${COLOR_MAGENTA}Protocol Commander${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 1200 ]; then
+  printf "${COLOR_MAGENTA}Core Strategist${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 1450 ]; then
+  printf "${COLOR_YELLOW}Quantum Captain${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 1750 ]; then
+  printf "${COLOR_YELLOW}Void Admiral${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 2100 ]; then
+  printf "${COLOR_YELLOW}Nexus Marshal${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 2500 ]; then
+  printf "${COLOR_RED}Binary Overmind${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 3000 ]; then
+  printf "${COLOR_RED}Nexus Ascendant${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 3600 ]; then
+  printf "${COLOR_RED}Reality Compiler${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 4300 ]; then
+  printf "${COLOR_RED}Singularity Protocol${COLOR_NEUTRAL}\n"
+
+else
+  printf "${COLOR_RED}NEXUS-ZERO // 01101001${COLOR_NEUTRAL}\n"
+fi
+
   printf "\n  ${COLOR_CYAN}Created by Dulsara(SYNAPSNEX)${COLOR_NEUTRAL}\n"
   printf "  ${COLOR_YELLOW}dulsara.synapsnex@gmail.com${COLOR_NEUTRAL}\n\n"
   
