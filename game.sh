@@ -1340,7 +1340,7 @@ fi
 
 show_help() {
   printf "${COLOR_CYAN}╔═══════════════════════════════════════════════════╗${COLOR_NEUTRAL}\n"
-  printf "${COLOR_CYAN}║${COLOR_NEUTRAL}         STAR RUNNER - MISSION BRIEFING               ${COLOR_CYAN}║${COLOR_NEUTRAL}\n"
+  printf "${COLOR_CYAN}║${COLOR_NEUTRAL}         STAR RUNNER - MISSION BRIEFING            ${COLOR_CYAN}║${COLOR_NEUTRAL}\n"
   printf "${COLOR_CYAN}╚═══════════════════════════════════════════════════╝${COLOR_NEUTRAL}\n\n"
   printf "${COLOR_YELLOW}CONTROLS:${COLOR_NEUTRAL}\n"
   printf "  Arrow Keys - Navigate your ship\n"

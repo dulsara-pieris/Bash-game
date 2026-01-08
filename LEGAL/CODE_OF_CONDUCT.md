@@ -18,7 +18,7 @@ All participants, whether using, modifying, or distributing this software, are e
 ## Unacceptable Behavior
 - Removing or obscuring the original author’s credit.
 - Claiming the work as entirely your own without proper attribution.
-- Using this software to harass, defame, or misrepresent other projects or individuals.
+- Using this software to harass, defame, or misrepresent other open source projects or individuals.
 - Violating license terms (SAPL v1.3) intentionally or recklessly.
 
 ## Enforcement
