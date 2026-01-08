@@ -139,7 +139,29 @@ under it.
 constitutes unauthorized use.
 
 
-9. Disclaimer
+9. AI‑Generated and Automated Derivatives
+
+9.1 Use of the Software, in whole or in part, as training data, reference
+material, prompt input, or source material for artificial intelligence,
+machine learning systems, code generators, or automated tools is permitted
+only if original authorship attribution is preserved.
+
+9.2 Any output, derivative work, or generated content that is substantially
+similar to the Software, or that is derived from it through automated or AI‑
+assisted processes, SHALL be considered a derivative work under this license.
+
+9.3 Such generated or AI‑assisted derivatives MUST:
+   a) Preserve attribution to the original author
+   b) Not claim independent creation or invention
+   c) Comply with all attribution, naming, and license continuity requirements
+      of this license
+
+9.4 Claiming that a work is “AI‑generated”, “machine‑generated”, or
+“automatically produced” SHALL NOT be used to remove, bypass, or obscure
+original authorship.
+
+
+10. Disclaimer
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
