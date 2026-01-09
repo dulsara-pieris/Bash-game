@@ -26,15 +26,10 @@ To run this game, you need:
 * Standard utilities: `sh`, `stty`, `dd`, `od`.
 * A terminal window sized at least **40 columns x 20 lines**.
 
-### 📝 Installation Instructions
+### 📝 Installation
 
-1. **Create the file:**
-   Create a new file named `star_runner.sh` and paste the game code into it.
 
-2. **Grant Execution Permissions:**
-   Open your terminal and run the following command to allow the script to run:
-   ```bash
-   chmod +x star_runner.sh
+
 
 ### Key,Action
 **Arrow Keys** "Navigate Ship (Up, Down, Left, Right)"
