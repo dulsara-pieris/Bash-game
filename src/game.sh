@@ -1259,27 +1259,35 @@ EOF
     printf "  ${COLOR_RED}💥 Total Asteroids:${COLOR_NEUTRAL} $total_asteroids\n\n"
   fi
   
-  printf "  ${COLOR_GREEN}☆ Rank:${COLOR_NEUTRAL} "
-if [ "$score" -lt 20 ]; then
-  printf "${COLOR_WHITE}Street Spectator${COLOR_NEUTRAL}\n"
+printf "  ${COLOR_GREEN}☆ Rank:${COLOR_NEUTRAL} "
 
-elif [ "$score" -lt 40 ]; then
-  printf "${COLOR_WHITE}Neon Bystander${COLOR_NEUTRAL}\n"
+if [ "$score" -lt 10 ]; then
+  printf "${COLOR_WHITE}Neural Trash${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 65 ]; then
-  printf "${COLOR_WHITE}Signal Listener${COLOR_NEUTRAL}\n"
+elif [ "$score" -lt 25 ]; then
+  printf "${COLOR_WHITE}Synapse Junk${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 90 ]; then
-  printf "${COLOR_WHITE}Binary Initiate${COLOR_NEUTRAL}\n"
+elif [ "$score" -lt 45 ]; then
+  printf "${COLOR_WHITE}Chrome Addict${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 120 ]; then
-  printf "${COLOR_GREEN}Cadet${COLOR_NEUTRAL}\n"
+elif [ "$score" -lt 70 ]; then
+  printf "${COLOR_WHITE}Implant Wreck${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 155 ]; then
-  printf "${COLOR_GREEN}Data Trainee${COLOR_NEUTRAL}\n"
+elif [ "$score" -lt 100 ]; then
+  printf "${COLOR_WHITE}Backstreet Mind${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 195 ]; then
-  printf "${COLOR_GREEN}Grid Operator${COLOR_NEUTRAL}\n"
+elif [ "$score" -lt 135 ]; then
+  printf "${COLOR_GREEN}Signal Leech${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 175 ]; then
+  printf "${COLOR_GREEN}Neural Runner${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 220 ]; then
+  printf "${COLOR_GREEN}Grid Initiate${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 280 ]; then
+  printf "${COLOR_GREEN}Net Operator${COLOR_NEUTRAL}\n"
+
 
 elif [ "$score" -lt 240 ]; then
   printf "${COLOR_CYAN}Packet Runner${COLOR_NEUTRAL}\n"
