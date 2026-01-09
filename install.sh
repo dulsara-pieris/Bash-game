@@ -27,7 +27,7 @@ sudo cp -r ./* /usr/local/share/star-runner/
 # Create launcher
 sudo tee /usr/local/bin/star-runner > /dev/null << 'EOF'
 #!/usr/bin/env bash
-exec /usr/local/share/star-runner/game.sh "$@"
+exec /usr/local/share/star-runner/src/game.sh "$@"
 EOF
 
 sudo chmod +x /usr/local/bin/star-runner
