@@ -16,7 +16,7 @@ Developed by **Dulsara Pieris (SYNAPSNEX)**.
   * **☢ Shield:** Absorb a single hit without destroying your ship.
   * **◈ Super Mode:** Become invincible and destroy asteroids on contact.
   * **⊕ Ammo Pack:** Refill your laser reserves.
-* **Ranking System:** Progress from a **Street Spectator** to a legendary **NEXUS-ZERO // 01101001** based on your mission performance.
+* **Ranking System:** Progress from a **Neural Trash** to a legendary **NEXUS-ZERO // 01101001** based on your mission performance.
 
 ---
 
