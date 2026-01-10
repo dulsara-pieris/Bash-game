@@ -1382,8 +1382,7 @@ show_help() {
 }
 
 update() {
-#!/usr/bin/env bash
-  printf "$COLOR_CYAN"
+  printf "%s" "$COLOR_CYAN"
   cat << "EOF"
 
     ███████╗████████╗ █████╗ ██████╗     ██████╗ ██╗   ██╗███╗   ██╗███╗   ██╗███████╗██████╗ 
@@ -1394,30 +1393,28 @@ update() {
     ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
                                                                                                 
 EOF
-set -e
-echo "Updating star-runner…"
 
-# Remove old install
-sudo rm -f /usr/local/bin/Star-runner
-sudo rm -rf /usr/local/share/Star-runner
+  set -e
+  echo "Updating star-runner…"
 
-# Create install dir
-sudo mkdir -p /usr/local/share/Star-runner
-cd /usr/local/share/
-git clone https://github.com/dulsara-pieris/Star-runner
-cd Star-runner
+  # Remove old install
+  sudo rm -rf /usr/local/share/Star-runner
+  sudo rm -f /usr/local/bin/star-runner
 
-# Create launcher
-sudo tee /usr/local/bin/star-runner > /dev/null << 'EOF'
+  # Reinstall
+  sudo git clone https://github.com/dulsara-pieris/Star-runner /usr/local/share/Star-runner
+
+  # Launcher
+  sudo tee /usr/local/bin/star-runner > /dev/null << 'EOF'
 #!/usr/bin/env bash
 exec /usr/local/share/Star-runner/src/game.sh "$@"
 EOF
 
-sudo chmod +x /usr/local/bin/star-runner
+  sudo chmod +x /usr/local/bin/star-runner
 
-echo "✔ star-runner Updating!"
-echo "You can now run the game with: star-runner"
+  echo "✔ star-runner updated!"
 }
+
 
 
 # Game variables
