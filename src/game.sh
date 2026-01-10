@@ -1388,47 +1388,58 @@ show_help() {
 }
 
 update() {
-  set -e
+    set -e
 
-  INSTALL_DIR="/usr/local/share/Star-runner"
-  VERSION_FILE="$INSTALL_DIR/VERSION"
+    INSTALL_DIR="/usr/local/share/Star-runner"
+    VERSION_FILE="$INSTALL_DIR/VERSION"
 
-  # Read version safely (strip newline)
-  if [[ -f "$VERSION_FILE" ]]; then
-    CURRENT_VERSION=$(<"$VERSION_FILE")
-    CURRENT_VERSION="${CURRENT_VERSION//$'\n'/}"  # remove newline
-  else
-    CURRENT_VERSION="unknown"
-  fi
-
-  echo "🔄 Updating Star-runner…"
-  echo "📌 Current version: $CURRENT_VERSION"
-
-  git config --global --add safe.directory "$INSTALL_DIR"
-
-  cd "$INSTALL_DIR"
-
-  OLD_COMMIT=$(git rev-parse HEAD)
-
-  echo "📥 Fetching updates…"
-  git fetch origin
-
-  if git merge --ff-only origin/main; then
-    # Read new version from VERSION file after update
-    if [[ -f "$VERSION_FILE" ]]; then
-      NEW_VERSION=$(<"$VERSION_FILE")
-      NEW_VERSION="${NEW_VERSION//$'\n'/}"
-    else
-      NEW_VERSION="$CURRENT_VERSION"
+    # Make sure we are in the correct directory
+    if [[ ! -d "$INSTALL_DIR" ]]; then
+        echo "❌ Star-runner is not installed in $INSTALL_DIR"
+        exit 1
     fi
-    echo "✅ Update successful!"
-    echo "🆕 New version: $NEW_VERSION"
-  else
-    echo "❌ Update failed! Rolling back…"
-    git reset --hard "$OLD_COMMIT"
-    echo "↩ Rolled back to $CURRENT_VERSION"
-    exit 1
-  fi
+
+    cd "$INSTALL_DIR"
+
+    # Ensure git can write
+    git config --global --add safe.directory "$INSTALL_DIR"
+
+    # Read current version safely
+    if [[ -f "$VERSION_FILE" ]]; then
+        CURRENT_VERSION=$(<"$VERSION_FILE")
+        CURRENT_VERSION="${CURRENT_VERSION//$'\n'/}"  # strip newline
+    else
+        CURRENT_VERSION="unknown"
+    fi
+
+    echo "🔄 Updating Star-runner…"
+    echo "📌 Current version: $CURRENT_VERSION"
+
+    # Save rollback point
+    OLD_COMMIT=$(git rev-parse HEAD)
+
+    echo "📥 Fetching updates…"
+    git fetch origin
+
+    # Fast-forward merge
+    if git merge --ff-only origin/main; then
+        # Read new version after update
+        if [[ -f "$VERSION_FILE" ]]; then
+            NEW_VERSION=$(<"$VERSION_FILE")
+            NEW_VERSION="${NEW_VERSION//$'\n'/}"  # strip newline
+        else
+            NEW_VERSION="$CURRENT_VERSION"
+        fi
+
+        echo "✅ Update successful!"
+        echo "🆕 New version: $NEW_VERSION"
+
+    else
+        echo "❌ Update failed! Rolling back…"
+        git reset --hard "$OLD_COMMIT"
+        echo "↩ Rolled back to $CURRENT_VERSION"
+        exit 1
+    fi
 }
 
 
