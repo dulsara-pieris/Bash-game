@@ -488,7 +488,8 @@ EOF
   printf "  ${COLOR_YELLOW}[2]${COLOR_NEUTRAL} Hangar (Ships & Skins)\n"
   printf "  ${COLOR_MAGENTA}[3]${COLOR_NEUTRAL} View Stats\n"
   printf "  ${COLOR_CYAN}[4]${COLOR_NEUTRAL} Help\n"
-  printf "  ${COLOR_RED}[5]${COLOR_NEUTRAL} Quit\n\n"
+  printf "  ${COLOR_CYAN}[5]${COLOR_NEUTRAL} Update\n\n"
+  printf "  ${COLOR_RED}[6]${COLOR_NEUTRAL} Quit\n\n"
   printf "  Select option: "
   
   read -r menu_choice
@@ -512,6 +513,12 @@ EOF
       show_main_menu
       ;;
     5)
+      star-runner -u
+      printf "\n  Press Enter to return..."
+      read -r
+      show_main_menu
+      ;;
+    6)
       printf "\n  ${COLOR_CYAN}Thanks for playing! Fly safe, pilot!${COLOR_NEUTRAL}\n\n"
       exit 0
       ;;
