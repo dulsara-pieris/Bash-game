@@ -25,7 +25,7 @@ git clone https://github.com/dulsara-pieris/Star-runner
 cd Star-runner
 
 # Create launcher
-sudo tee /usr/local/bin/Star-runner > /dev/null << 'EOF'
+sudo tee /usr/local/bin/star-runner > /dev/null << 'EOF'
 #!/usr/bin/env bash
 exec /usr/local/share/Star-runner/src/game.sh "$@"
 EOF
