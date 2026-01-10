@@ -1444,16 +1444,14 @@ crystals_collected=0
 asteroids_destroyed=0
 
 while :; do
-  case $1 in
-    -h | --help)
+  case "$1" in
+    -h|--help)
       show_help
-      exit
+      exit 0
       ;;
-    --)
-  case $1 in
-    -u | --update)
+    -u|--update)
       update
-      exit
+      exit 0
       ;;
     --)
       shift
@@ -1464,10 +1462,12 @@ while :; do
       exit 1
       ;;
     *)
-      break ;;
+      break
+      ;;
   esac
   shift
 done
+
 
 # Initialize or load profile
 init_profile
