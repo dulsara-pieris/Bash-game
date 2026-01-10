@@ -1382,37 +1382,40 @@ show_help() {
 }
 
 update() {
-  printf "%s" "$COLOR_CYAN"
-  cat << "EOF"
-
-    ███████╗████████╗ █████╗ ██████╗     ██████╗ ██╗   ██╗███╗   ██╗███╗   ██╗███████╗██████╗ 
-    ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗    ██╔══██╗██║   ██║████╗  ██║████╗  ██║██╔════╝██╔══██╗
-    ███████╗   ██║   ███████║██████╔╝    ██████╔╝██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██████╔╝
-    ╚════██║   ██║   ██╔══██║██╔══██╗    ██╔══██╗██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██╔══██╗
-    ███████║   ██║   ██║  ██║██║  ██║    ██║  ██║╚██████╔╝██║ ╚████║██║ ╚████║███████╗██║  ██║
-    ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝
-                                                                                                
-EOF
-
   set -e
-  echo "Updating star-runner…"
 
-  # Remove old install
-  sudo rm -rf /usr/local/share/Star-runner
-  sudo rm -f /usr/local/bin/star-runner
+  INSTALL_DIR="/usr/local/share/Star-runner"
 
-  # Reinstall
-  sudo git clone https://github.com/dulsara-pieris/Star-runner /usr/local/share/Star-runner
+  echo "🔄 Updating star-runner…"
 
-  # Launcher
-  sudo tee /usr/local/bin/star-runner > /dev/null << 'EOF'
-#!/usr/bin/env bash
-exec /usr/local/share/Star-runner/src/game.sh "$@"
-EOF
+  if [[ ! -d "$INSTALL_DIR/.git" ]]; then
+    echo "❌ No git repository found. Cannot update safely."
+    exit 1
+  fi
 
-  sudo chmod +x /usr/local/bin/star-runner
+  cd "$INSTALL_DIR"
 
-  echo "✔ star-runner updated!"
+  # Save rollback point
+  OLD_COMMIT=$(git rev-parse HEAD)
+
+  echo "📌 Current version: $OLD_COMMIT"
+  echo "📥 Fetching updates…"
+
+  if ! git fetch origin; then
+    echo "❌ Fetch failed. Aborting."
+    exit 1
+  fi
+
+  # Try fast-forward update
+  if git merge --ff-only origin/main; then
+    echo "✅ Update successful!"
+    echo "🆕 New version: $(git rev-parse HEAD)"
+  else
+    echo "❌ Update failed! Rolling back…"
+    git reset --hard "$OLD_COMMIT"
+    echo "↩ Rolled back to $OLD_COMMIT"
+    exit 1
+  fi
 }
 
 
