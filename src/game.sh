@@ -1388,6 +1388,9 @@ update() {
 
   echo "🔄 Updating star-runner…"
 
+  # ✅ FIX: allow root-owned repo
+  git config --global --add safe.directory "$INSTALL_DIR"
+
   if [[ ! -d "$INSTALL_DIR/.git" ]]; then
     echo "❌ No git repository found. Cannot update safely."
     exit 1
@@ -1395,18 +1398,12 @@ update() {
 
   cd "$INSTALL_DIR"
 
-  # Save rollback point
   OLD_COMMIT=$(git rev-parse HEAD)
-
   echo "📌 Current version: $OLD_COMMIT"
+
   echo "📥 Fetching updates…"
+  git fetch origin
 
-  if ! git fetch origin; then
-    echo "❌ Fetch failed. Aborting."
-    exit 1
-  fi
-
-  # Try fast-forward update
   if git merge --ff-only origin/main; then
     echo "✅ Update successful!"
     echo "🆕 New version: $(git rev-parse HEAD)"
