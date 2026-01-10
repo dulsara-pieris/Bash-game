@@ -12,7 +12,7 @@
   - Not the original creator; original authorship remains with Dulsara Pieris
 
 ## Other Contributors / Modifiers
-- Any person or entity who modifies or contributes to this project must be added here
+- Any person or entity who modifies or contributes other than autors and project admin to this project must be added here
 - Contributions should include:
   - Full name or organization
   - Date of contribution
@@ -27,3 +27,5 @@
 2. Clearly describe your modifications.
 3. Follow all license obligations under **SAPL v1.3**.
 4. Respect the ethical and community guidelines in `CODE_OF_CONDUCT.md`.
+
+### Contribtions
