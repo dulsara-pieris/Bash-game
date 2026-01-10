@@ -11,7 +11,6 @@
                                                                                                 
 EOF
 set -e
-pwd=pwd
 echo "Installing star-runner…"
 
 # Remove old install
