@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
 
-# SYNAPSNEX OSS-Protection License (SOPL) v1.0
-# STAR RUNNER - Punishments Module
+# STAR RUNNER - Punishments Module (Fixed)
 # Fully reversible long-term and short-term punishments
 
 # ------------------------------
 # Config
 # ------------------------------
 LOW_SCORE_THRESHOLD=50
-PUNISHMENT_DURATION=50  # frames
+PUNISHMENT_DURATION=50  # frames for short-term
 PUNISHMENT_ACTIVE=0
 PUNISHMENT_TIMER=0
 
 # Long-term punishment
 punishment_expires=0
 punishment_level=0
-punishment_backup=()  # stores: name, gender, title, skin, ship, ammo
+punishment_backup=()  # [name, gender, title, skin, ship, ammo]
 
 FUNNY_NAMES=("AsteroidMagnet" "NoobSauce" "TrashPilot" "SpacePeasant" "NeuralTrash" "OopsiePilot")
 PUNISHMENT_SKINS=(5 4 3)
 
 # ------------------------------
-# Backup original profile
+# Backup profile
 # ------------------------------
 backup_profile_for_punishment() {
     if [ "${#punishment_backup[@]}" -eq 0 ]; then
@@ -30,7 +29,7 @@ backup_profile_for_punishment() {
 }
 
 # ------------------------------
-# Restore profile after punishment
+# Restore profile
 # ------------------------------
 restore_profile_after_punishment() {
     player_name="${punishment_backup[0]}"
@@ -43,7 +42,7 @@ restore_profile_after_punishment() {
     punishment_expires=0
     punishment_level=0
     save_profile
-    printf "$COLOR_GREEN ✓ Your profile has been restored! $COLOR_NEUTRAL\n"
+    printf "$COLOR_GREEN ✓ Profile restored to normal! $COLOR_NEUTRAL\n"
 }
 
 # ------------------------------
@@ -54,27 +53,17 @@ apply_long_term_punishment() {
     backup_profile_for_punishment
 
     if [ "$punishment_expires" -gt "$current_time" ]; then
-        # Already punished -> escalate
+        # Escalate punishment
         punishment_level=$((punishment_level + 1))
         days=$((3 * punishment_level))
         punishment_expires=$((current_time + days*24*60*60))
 
-        # Flip from ORIGINAL gender/title
+        # Flip gender/title from original backup
         orig_gender="${punishment_backup[1]}"
-        orig_title="${punishment_backup[2]}"
         case "$orig_gender" in
-            "Male")
-                player_gender="Female"
-                player_title="Madam"
-                ;;
-            "Female")
-                player_gender="Male"
-                player_title="Sir"
-                ;;
-            *)
-                player_gender="Alien"
-                player_title="Mx"
-                ;;
+            "Male")   player_gender="Female"; player_title="Madam" ;;
+            "Female") player_gender="Male";   player_title="Sir" ;;
+            *)        player_gender="Alien";  player_title="Mx" ;;
         esac
     else
         # First-time punishment
@@ -82,24 +71,15 @@ apply_long_term_punishment() {
         days=3
         punishment_expires=$((current_time + days*24*60*60))
 
-        # Flip gender/title from current
+        # Flip gender/title from current profile
         case "$player_gender" in
-            "Male")
-                player_gender="Female"
-                player_title="Madam"
-                ;;
-            "Female")
-                player_gender="Male"
-                player_title="Sir"
-                ;;
-            *)
-                player_gender="Alien"
-                player_title="Mx"
-                ;;
+            "Male")   player_gender="Female"; player_title="Madam" ;;
+            "Female") player_gender="Male";   player_title="Sir" ;;
+            *)        player_gender="Alien";  player_title="Mx" ;;
         esac
     fi
 
-    # Apply funny name, ugly skin, slow ship
+    # Apply random funny name, punishment skin, and slow ship
     player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
     current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
     current_ship=1
@@ -151,7 +131,7 @@ apply_short_punishment() {
 }
 
 # ------------------------------
-# Punishment tick
+# Punishment tick per frame
 # ------------------------------
 punishment_tick() {
     if [ "$PUNISHMENT_ACTIVE" -eq 1 ]; then
@@ -181,7 +161,7 @@ blink_ship_effect() {
 }
 
 # ------------------------------
-# Trigger punishment if score too low
+# Trigger punishment if low score
 # ------------------------------
 check_low_score_punishment() {
     if [ "$score" -lt "$LOW_SCORE_THRESHOLD" ]; then
