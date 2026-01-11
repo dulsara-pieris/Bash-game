@@ -5,6 +5,8 @@
 
 # Profile file location
 PROFILE_FILE="$HOME/.star_runner_profile"
+# Only allow the game script to read/write it (owner only)
+chmod 600 "$PROFILE_FILE"
 
 # Initialize profile - create new or load existing
 init_profile() {
@@ -44,25 +46,6 @@ create_new_profile() {
   printf "  Enter your name: "
   read -r player_name
   
-  # Get title
-  printf "\n  Select title:\n"
-  printf "  ${COLOR_CYAN}[1]${COLOR_NEUTRAL} Captain\n"
-  printf "  ${COLOR_CYAN}[2]${COLOR_NEUTRAL} Commander\n"
-  printf "  ${COLOR_CYAN}[3]${COLOR_NEUTRAL} Pilot\n"
-  printf "  ${COLOR_CYAN}[4]${COLOR_NEUTRAL} Lieutenant\n"
-  printf "  ${COLOR_CYAN}[5]${COLOR_NEUTRAL} Ace\n"
-  printf "\n  Choice: "
-  read -r title_choice
-  
-  case $title_choice in
-    1) player_title="Captain" ;;
-    2) player_title="Commander" ;;
-    3) player_title="Pilot" ;;
-    4) player_title="Lieutenant" ;;
-    5) player_title="Ace" ;;
-    *) player_title="Pilot" ;;
-  esac
-  
   # Get gender
   printf "\n  Select gender:\n"
   printf "  ${COLOR_CYAN}[1]${COLOR_NEUTRAL} Male\n"
@@ -70,13 +53,25 @@ create_new_profile() {
   printf "  ${COLOR_CYAN}[3]${COLOR_NEUTRAL} Other\n"
   printf "\n  Choice: "
   read -r gender_choice
-  
-  case $gender_choice in
-    1) player_gender="Male" ;;
-    2) player_gender="Female" ;;
-    3) player_gender="Other" ;;
-    *) player_gender="Other" ;;
-  esac
+case $gender_choice in
+  1) 
+    player_gender="Male"
+    player_title="Sir" 
+    ;;
+  2) 
+    player_gender="Female"
+    player_title="Ma'am" 
+    ;;
+  3) 
+    player_gender="Other"
+    player_title="Mx" 
+    ;;
+  *) 
+    player_gender="Other"
+    player_title="Mx" 
+    ;;
+esac
+
   
   # Get birth year
   printf "\n  Enter birth year (e.g., 2000): "
