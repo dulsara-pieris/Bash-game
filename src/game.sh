@@ -489,7 +489,7 @@ EOF
   printf "  ${COLOR_YELLOW}[2]${COLOR_NEUTRAL} Hangar (Ships & Skins)\n"
   printf "  ${COLOR_MAGENTA}[3]${COLOR_NEUTRAL} View Stats\n"
   printf "  ${COLOR_CYAN}[4]${COLOR_NEUTRAL} Help\n"
-  printf "  ${COLOR_NEUTRSL}[5]${COLOR_NEUTRAL} Update\n"
+  printf "  ${COLOR_NEUTRAL}}[5]${COLOR_NEUTRAL} Update\n"
   printf "  ${COLOR_RED}[6]${COLOR_NEUTRAL} Quit\n\n"
   printf "  Select option: "
   
@@ -514,7 +514,7 @@ EOF
       show_main_menu
       ;;
     5)
-      star-runner -u
+      update
       printf "\n  Press Enter to return..."
       read -r
       show_main_menu
@@ -1298,12 +1298,11 @@ elif [ "$score" -lt 175 ]; then
 elif [ "$score" -lt 220 ]; then
   printf "${COLOR_GREEN}Grid Initiate${COLOR_NEUTRAL}\n"
 
-elif [ "$score" -lt 280 ]; then
-  printf "${COLOR_GREEN}Net Operator${COLOR_NEUTRAL}\n"
-
-
 elif [ "$score" -lt 240 ]; then
   printf "${COLOR_CYAN}Packet Runner${COLOR_NEUTRAL}\n"
+
+elif [ "$score" -lt 280 ]; then
+  printf "${COLOR_GREEN}Net Operator${COLOR_NEUTRAL}\n"
 
 elif [ "$score" -lt 300 ]; then
   printf "${COLOR_CYAN}Neon Pilot${COLOR_NEUTRAL}\n"
