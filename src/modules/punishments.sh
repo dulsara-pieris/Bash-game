@@ -50,37 +50,27 @@ restore_profile_after_punishment() {
 apply_long_term_punishment() {
     current_time=$(date +%s)
 
-    # If punishment still active, skip
+    # Only apply if no active punishment
     if [ "$punishment_expires" -gt "$current_time" ]; then return; fi
 
-    # Backup original profile if first time
+    # Increment punishment level
+    punishment_level=$((punishment_level + 1))
+
+    # Backup original profile first time
     if [ "${#punishment_backup[@]}" -eq 0 ]; then
-        backup_profile_for_punishment
-        punishment_level=1
-    else
-        # Already punished before
-        punishment_level=$((punishment_level + 1))
+        punishment_backup=("$player_name" "$player_gender" "$player_title" "$current_skin" "$current_ship" "$ammo")
     fi
 
-    # Punishment duration increases each level
+    # Punishment duration doubles with each level
     base_days=3
     days=$((base_days * punishment_level))
     punishment_expires=$((current_time + days*24*60*60))
 
-    # Apply funny/harsher name
-    if [ "$punishment_level" -eq 1 ]; then
-        player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
-    else
-        # Harsher names second time
-        HARSH_NAMES=("TrashPilot" "NeuralTrash" "SpacePeasant" "AsteroidMagnet")
-        player_name=${HARSH_NAMES[$RANDOM % ${#HARSH_NAMES[@]}]}
-    fi
+    # Apply funny name
+    player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
 
-    # Invert gender/title based on original profile
-    original_gender="${punishment_backup[1]}"
-    original_title="${punishment_backup[5]:-$player_title}" # store original title in backup[5] if available
-
-    case "$original_gender" in
+    # Invert gender and title
+    case "$player_gender" in
         "Male")
             player_gender="Female"
             player_title="Madam"
@@ -91,31 +81,19 @@ apply_long_term_punishment() {
             ;;
         *)
             player_gender="Alien"
-            player_title="SpaceBeing"
+            player_title="Mx"
             ;;
     esac
 
-    # Force ugly skin and slowest ship (more extreme if second punishment)
-    if [ "$punishment_level" -eq 1 ]; then
-        current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
-        current_ship=1
-    else
-        # Harsh punishment: forced skin + slowest ship
-        current_skin=5
-        current_ship=1
-    fi
-
+    # Force ugly skin and slowest ship
+    current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
+    current_ship=1
     ammo=$(get_ship_ammo "$current_ship")
 
-    # Optional: additional chaos for repeated punishment
-    [ "$punishment_level" -gt 1 ] && apply_reverse_controls
-
-    # Save profile changes
     save_profile
 
     printf "$COLOR_RED ⚠ Punishment applied for $days day(s)! Level: $punishment_level, Name: $player_name, Gender: $player_gender $COLOR_NEUTRAL\n"
 }
-
 
 # ------------------------------
 # Check if long-term punishment expired
