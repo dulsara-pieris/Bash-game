@@ -76,6 +76,8 @@ on_exit() {
   
   printf "$COLOR_CYAN"
   clear
+  check_low_score_punishment
+  punishment_tick
 cat << "EOF"
 
  ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
@@ -165,7 +167,5 @@ EOF
 
   printf "\n  ${COLOR_CYAN}Created by Dulsara(SYNAPSNEX)${COLOR_NEUTRAL}\n"
   printf "  ${COLOR_YELLOW}dulsara.synapsnex@gmail.com${COLOR_NEUTRAL}\n\n"
-    check_low_score_punishment
-    punishment_tick
   exit
 }
