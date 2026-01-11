@@ -173,7 +173,18 @@ current_ship=$current_ship
 current_skin=$current_skin
 owned_ships="$owned_ships"
 owned_skins="$owned_skins"
+
+# Punishment variables
+punishment_level=$punishment_level
+punishment_expires=$punishment_expires
+punishment_backup_name="$punishment_backup_name"
+punishment_backup_gender="$punishment_backup_gender"
+punishment_backup_title="$punishment_backup_title"
+punishment_backup_skin="$punishment_backup_skin"
+punishment_backup_ship="$punishment_backup_ship"
+punishment_backup_ammo="$punishment_backup_ammo"
 EOF
+}
 
     # Update checksum
     echo "$(generate_checksum)" > "$CHECKSUM_FILE"

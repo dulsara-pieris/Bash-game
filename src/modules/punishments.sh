@@ -1,85 +1,110 @@
 #!/usr/bin/env bash
 
-# STAR RUNNER - Punishments Module (Fixed)
-# Fully reversible long-term and short-term punishments
+# STAR RUNNER - Punishments Module (FULL FIXED)
+# Author: Dulsara Pieris (SYNAPSNEX)
+# Handles long-term and short-term punishments, fully reversible
 
 # ------------------------------
 # Config
 # ------------------------------
-LOW_SCORE_THRESHOLD=50
-PUNISHMENT_DURATION=50  # frames for short-term
+LOW_SCORE_THRESHOLD=50        # Minimum score before punishment triggers
+PUNISHMENT_DURATION=50        # Short-term punishment frames
+
+# Short-term punishment
 PUNISHMENT_ACTIVE=0
 PUNISHMENT_TIMER=0
 
-# Long-term punishment
-punishment_expires=0
-punishment_level=0
-punishment_backup=()  # [name, gender, title, skin, ship, ammo]
+# Long-term punishment (persisted)
+punishment_level=${punishment_level:-0}
+punishment_expires=${punishment_expires:-0}
+
+# Original profile backup (persisted)
+punishment_backup_name="${punishment_backup_name:-}"
+punishment_backup_gender="${punishment_backup_gender:-}"
+punishment_backup_title="${punishment_backup_title:-}"
+punishment_backup_skin="${punishment_backup_skin:-}"
+punishment_backup_ship="${punishment_backup_ship:-}"
+punishment_backup_ammo="${punishment_backup_ammo:-}"
 
 FUNNY_NAMES=("AsteroidMagnet" "NoobSauce" "TrashPilot" "SpacePeasant" "NeuralTrash" "OopsiePilot")
 PUNISHMENT_SKINS=(5 4 3)
 
 # ------------------------------
-# Backup profile
+# Backup original profile before long-term punishment
 # ------------------------------
 backup_profile_for_punishment() {
-    if [ "${#punishment_backup[@]}" -eq 0 ]; then
-        punishment_backup=("$player_name" "$player_gender" "$player_title" "$current_skin" "$current_ship" "$ammo")
+    if [ -z "$punishment_backup_name" ]; then
+        punishment_backup_name="$player_name"
+        punishment_backup_gender="$player_gender"
+        punishment_backup_title="$player_title"
+        punishment_backup_skin="$current_skin"
+        punishment_backup_ship="$current_ship"
+        punishment_backup_ammo="$ammo"
     fi
 }
 
 # ------------------------------
-# Restore profile
+# Restore profile after long-term punishment expires
 # ------------------------------
 restore_profile_after_punishment() {
-    player_name="${punishment_backup[0]}"
-    player_gender="${punishment_backup[1]}"
-    player_title="${punishment_backup[2]}"
-    current_skin="${punishment_backup[3]}"
-    current_ship="${punishment_backup[4]}"
-    ammo="${punishment_backup[5]}"
-    punishment_backup=()
-    punishment_expires=0
+    player_name="$punishment_backup_name"
+    player_gender="$punishment_backup_gender"
+    player_title="$punishment_backup_title"
+    current_skin="$punishment_backup_skin"
+    current_ship="$punishment_backup_ship"
+    ammo="$punishment_backup_ammo"
+
+    # Clear punishment state
     punishment_level=0
+    punishment_expires=0
+    punishment_backup_name=""
+    punishment_backup_gender=""
+    punishment_backup_title=""
+    punishment_backup_skin=""
+    punishment_backup_ship=""
+    punishment_backup_ammo=""
+
     save_profile
-    printf "$COLOR_GREEN ✓ Profile restored to normal! $COLOR_NEUTRAL\n"
+    printf "$COLOR_GREEN ✓ Your profile has been restored to normal! $COLOR_NEUTRAL\n"
 }
 
 # ------------------------------
 # Apply long-term punishment
 # ------------------------------
 apply_long_term_punishment() {
+    local current_time
     current_time=$(date +%s)
+
     backup_profile_for_punishment
 
     if [ "$punishment_expires" -gt "$current_time" ]; then
         # Escalate punishment
         punishment_level=$((punishment_level + 1))
-        days=$((3 * punishment_level))
-        punishment_expires=$((current_time + days*24*60*60))
-
-        # Flip gender/title from original backup
-        orig_gender="${punishment_backup[1]}"
-        case "$orig_gender" in
-            "Male")   player_gender="Female"; player_title="Madam" ;;
-            "Female") player_gender="Male";   player_title="Sir" ;;
-            *)        player_gender="Alien";  player_title="Mx" ;;
-        esac
     else
-        # First-time punishment
+        # First-time punishment or expired
         punishment_level=1
-        days=3
-        punishment_expires=$((current_time + days*24*60*60))
-
-        # Flip gender/title from current profile
-        case "$player_gender" in
-            "Male")   player_gender="Female"; player_title="Madam" ;;
-            "Female") player_gender="Male";   player_title="Sir" ;;
-            *)        player_gender="Alien";  player_title="Mx" ;;
-        esac
     fi
 
-    # Apply random funny name, punishment skin, and slow ship
+    local days=$((3 * punishment_level))
+    punishment_expires=$((current_time + days*24*60*60))
+
+    # Flip gender/title based on original backup
+    case "$punishment_backup_gender" in
+        "Male")
+            player_gender="Female"
+            player_title="Madam"
+            ;;
+        "Female")
+            player_gender="Male"
+            player_title="Sir"
+            ;;
+        *)
+            player_gender="Alien"
+            player_title="Mx"
+            ;;
+    esac
+
+    # Apply funny name, ugly skin, slow ship
     player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
     current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
     current_ship=1
@@ -90,11 +115,12 @@ apply_long_term_punishment() {
 }
 
 # ------------------------------
-# Check long-term punishment expiration
+# Check if long-term punishment expired
 # ------------------------------
 check_long_term_punishment() {
+    local current_time
     current_time=$(date +%s)
-    if [ "$punishment_expires" -le "$current_time" ] && [ "${#punishment_backup[@]}" -gt 0 ]; then
+    if [ "$punishment_expires" -le "$current_time" ] && [ -n "$punishment_backup_name" ]; then
         restore_profile_after_punishment
     fi
 }
@@ -110,8 +136,9 @@ apply_short_punishment() {
     printf "\n$COLOR_RED ✗ Chaos punishment activated! $COLOR_NEUTRAL\n"
 
     # Reduce ship speed
+    local original_speed
     original_speed=$(get_ship_speed "$current_ship")
-    new_speed=$((original_speed - 1))
+    local new_speed=$((original_speed - 1))
     [ "$new_speed" -lt 1 ] && new_speed=1
     set_ship_speed "$current_ship" "$new_speed"
 
@@ -119,19 +146,19 @@ apply_short_punishment() {
     ammo=$((ammo / 2))
     [ "$ammo" -lt 1 ] && ammo=1
 
-    # Blink ship
+    # Blink ship effect
     blink_ship_effect
 
     # Spawn extra asteroids
     for i in {1..5}; do spawn_asteroid; done
 
-    # Temporary ugly skin
+    # Force ugly skin temporarily
     old_skin="$current_skin"
     current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
 }
 
 # ------------------------------
-# Punishment tick per frame
+# Punishment tick (call per frame)
 # ------------------------------
 punishment_tick() {
     if [ "$PUNISHMENT_ACTIVE" -eq 1 ]; then
@@ -161,7 +188,7 @@ blink_ship_effect() {
 }
 
 # ------------------------------
-# Trigger punishment if low score
+# Trigger punishments if score is low
 # ------------------------------
 check_low_score_punishment() {
     if [ "$score" -lt "$LOW_SCORE_THRESHOLD" ]; then
