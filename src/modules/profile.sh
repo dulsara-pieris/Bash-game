@@ -128,7 +128,7 @@ handle_tampered_profile() {
     printf "  ${COLOR_YELLOW}Profile integrity check failed!${COLOR_NEUTRAL}\n"
     printf "  ${COLOR_RED}Your profile was modified or corrupted.${COLOR_NEUTRAL}\n\n"
     printf "  ${COLOR_CYAN}The profile will now be reset to protect game integrity.${COLOR_NEUTRAL}\n"
-    printf "${COLOR_CYAN}wait 6 seconds"
+    printf "${COLOR_CYAN}     wait 6 seconds"
     sleep 6
 
     rm -f "$PROFILE_FILE" "$CHECKSUM_FILE" 2>/dev/null
