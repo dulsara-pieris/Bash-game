@@ -35,8 +35,6 @@ touch ~/.star_runner_profile ~/.star_runner_checksum
 
 # Give your user ownership
 chown $USER:$USER ~/.star_runner_profile ~/.star_runner_checksum
-
-# Give write permissions for the game
 chmod 600 ~/.star_runner_profile ~/.star_runner_checksum
 
 echo "✔ star-runner installed!"
