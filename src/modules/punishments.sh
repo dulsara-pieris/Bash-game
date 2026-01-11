@@ -84,8 +84,8 @@ apply_long_term_punishment() {
         # First-time punishment or expired
         punishment_level=1
     fi
-
-    local days=$((3 * punishment_level))
+    local base_days=3
+    local days=$(( base_days * 2 ** (punishment_level - 1) ))
     punishment_expires=$((current_time + days*24*60*60))
 
     # Flip gender/title based on original backup
