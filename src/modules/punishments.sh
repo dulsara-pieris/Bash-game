@@ -7,7 +7,7 @@
 # ------------------------------
 # Config
 # ------------------------------
-LOW_SCORE_THRESHOLD=50        # Minimum score before punishment triggers
+LOW_SCORE_THRESHOLD=150        # Minimum score before punishment triggers
 PUNISHMENT_DURATION=50        # Short-term punishment frames
 
 # Short-term punishment
