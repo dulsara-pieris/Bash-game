@@ -65,13 +65,17 @@ apply_long_term_punishment() {
     # Apply funny name
     player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
 
-    # Invert gender safely
     case "$player_gender" in
-        "Male") player_gender="Female" ;;
-        "Female") player_gender="Male" ;;
-        *) 
-            # Unknown gender: pick a funny default
-            player_gender="Alien" 
+        "Male")
+            player_gender="Female"
+            player_title="Madam"   # Flip title
+            ;;
+        "Female")
+            player_gender="Male"
+            player_title="Sir"     # Flip title
+            ;;
+        *)
+            # Keep unknown/other as-is
             ;;
     esac
 
