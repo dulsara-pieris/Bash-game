@@ -82,6 +82,7 @@ init_profile() {
       
       case $player_gender_input in
         [Mm]|[Mm]ale)
+        player_gender="Male"
           if [ "$player_age" -lt 5 ]; then
             player_title="Baby"
           elif [ "$player_age" -lt 18 ]; then
@@ -756,14 +757,11 @@ spawn_asteroid() {
 
 spawn_crystal() {
   if [ "$crystal_active" = 0 ]; then
-    chance=$(get_random_number 1 1)
-    if [ "$chance" = 1 ]; then
       line=$(get_random_number 3 $((NUM_LINES - 2)))
       column=$((NUM_COLUMNS - 2))
       crystal_line=$line
       crystal_col=$column
       crystal_active=1
-    fi
   fi
 }
 
