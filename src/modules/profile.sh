@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#SYNAPSNEX OSS-Protection License (SOPL) v1.0
+#Copyright (c) 2026 Dulsara Pieris
+
+
 # STAR RUNNER - Profile Management Module
 # Fully tamper-proof profile
 

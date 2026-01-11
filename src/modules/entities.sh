@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#SYNAPSNEX OSS-Protection License (SOPL) v1.0
+#Copyright (c) 2026 Dulsara Pieris
+
 # STAR RUNNER - Entities Module
 # Asteroids, crystals, and powerups
 

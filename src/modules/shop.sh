@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#SYNAPSNEX OSS-Protection License (SOPL) v1.0
+#Copyright (c) 2026 Dulsara Pieris
+
 # STAR RUNNER - Shop Module
 # Hangar (ship selection/purchase) and skin shop
 
