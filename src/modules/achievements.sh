@@ -27,18 +27,16 @@ owned_skins="1"
 EOF
 )
 
-# --------------------------------------
-# Colors for fancy UI
-# --------------------------------------
+# Colors
 COLOR_NEUTRAL="\e[0m"
 COLOR_CYAN="\e[36m"
 COLOR_GREEN="\e[32m"
 COLOR_YELLOW="\e[33m"
 COLOR_RED="\e[31m"
 
-# --------------------------------------
+# -------------------------------
 # Helpers
-# --------------------------------------
+# -------------------------------
 generate_checksum() {
     if [[ -f "$PROFILE_FILE" ]]; then
         if command -v sha256sum >/dev/null 2>&1; then
@@ -73,18 +71,26 @@ handle_tampered_profile() {
     create_new_profile
 }
 
-# --------------------------------------
+# -------------------------------
 # Profile functions
-# --------------------------------------
+# -------------------------------
 init_profile() {
-    # Create files if missing
-    [[ ! -f "$PROFILE_FILE" ]] && echo "$DEFAULT_PROFILE" > "$PROFILE_FILE"
-    [[ ! -f "$CHECKSUM_FILE" ]] && echo "$(generate_checksum)" > "$CHECKSUM_FILE"
+    # 1️⃣ Create profile if missing
+    if [[ ! -f "$PROFILE_FILE" ]]; then
+        echo "$DEFAULT_PROFILE" > "$PROFILE_FILE"
+    fi
 
-    # Reset if tampered
-    verify_profile_integrity || handle_tampered_profile
+    # 2️⃣ Create checksum if missing
+    if [[ ! -f "$CHECKSUM_FILE" ]]; then
+        echo "$(generate_checksum)" > "$CHECKSUM_FILE"
+    fi
 
-    # Load into shell
+    # 3️⃣ Only trigger alert if profile exists AND integrity fails
+    if [[ -f "$PROFILE_FILE" && -f "$CHECKSUM_FILE" ]]; then
+        verify_profile_integrity || handle_tampered_profile
+    fi
+
+    # 4️⃣ Load profile into shell variables
     load_profile
 }
 
@@ -96,11 +102,9 @@ create_new_profile() {
 
     printf "  ${COLOR_GREEN}Creating new pilot profile...${COLOR_NEUTRAL}\n\n"
 
-    # Get name
     printf "  Enter your name: "
     read -r player_name
 
-    # Get gender
     printf "\n  Select gender:\n"
     printf "  ${COLOR_CYAN}[1]${COLOR_NEUTRAL} Male\n"
     printf "  ${COLOR_CYAN}[2]${COLOR_NEUTRAL} Female\n"
@@ -114,12 +118,11 @@ create_new_profile() {
         3|*) player_gender="Other"; player_title="Mx" ;;
     esac
 
-    # Birth year
     printf "\n  Enter birth year (e.g., 2000): "
     read -r player_birth_year
     player_birth_year=$((player_birth_year + 0))
 
-    # Initialize default stats
+    # Initialize stats
     high_score=0
     crystal_bank=0
     total_crystals=0
@@ -131,7 +134,6 @@ create_new_profile() {
     owned_ships="1"
     owned_skins="1"
 
-    # Save profile
     save_profile
 
     printf "\n  ${COLOR_GREEN}✓ Profile created successfully!${COLOR_NEUTRAL}\n"
@@ -141,7 +143,6 @@ create_new_profile() {
 load_profile() {
     [[ -f "$PROFILE_FILE" ]] && . "$PROFILE_FILE"
 
-    # Ensure numeric values
     high_score=$((high_score + 0))
     crystal_bank=$((crystal_bank + 0))
     total_crystals=$((total_crystals + 0))
@@ -175,7 +176,7 @@ EOF
     echo "$(generate_checksum)" > "$CHECKSUM_FILE"
 }
 
-# --------------------------------------
+# -------------------------------
 # Initialize automatically
-# --------------------------------------
+# -------------------------------
 init_profile
