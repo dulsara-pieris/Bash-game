@@ -25,11 +25,11 @@ source "$SCRIPT_DIR/modules/weapons.sh"
 source "$SCRIPT_DIR/modules/collision.sh"
 source "$SCRIPT_DIR/modules/input.sh"
 source "$SCRIPT_DIR/modules/effects.sh"
-source "$SCRIPT_DIR/modules/achievements.sh"
+#source "$SCRIPT_DIR/modules/achievements.sh"
 source "$SCRIPT_DIR/modules/stats.sh"   # Optional: career stats module
 
 # Init tamper-proof achievements
-init_achievements
+#init_achievements
 
 # Parse CLI arguments
 while :; do
@@ -99,11 +99,6 @@ move_cursor $center_line $center_col
 printf "                           "
 
 # ------------------------------
-# Unlock first achievement immediately
-# ------------------------------
-unlock_achievement "First Flight"
-
-# ------------------------------
 # MAIN GAME LOOP
 # ------------------------------
 while true; do
@@ -169,15 +164,6 @@ while true; do
     # Increment frame
     # --------------------------
     frame=$((frame + 1))
-
-    # --------------------------
-    # Auto-unlock achievements
-    # --------------------------
-    [ "$frame" -ge 600 ] && unlock_achievement "Survivor"
-    [ "$crystals_collected" -ge 100 ] && unlock_achievement "Collector"
-    [ "$score" -ge 1000 ] && unlock_achievement "Speed Runner"
-    [ "$asteroids_destroyed" -ge 50 ] && unlock_achievement "Asteroid Destroyer"
-    [ "$level" -ge 5 ] && unlock_achievement "Level Up"
 
     # --------------------------
     # Update career stats

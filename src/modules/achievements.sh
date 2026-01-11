@@ -1,182 +1,103 @@
 #!/usr/bin/env bash
-#SYNAPSNEX OSS-Protection License (SOPL) v1.0
-#Copyright (c) 2026 Dulsara Pieris
+# SYNAPSNEX OSS-Protection License (SOPL) v1.0
+# Copyright (c) 2026 Dulsara Pieris
 
-# STAR RUNNER - Profile Management Module
-# Fully tamper-proof, fancy UI, full stats
+# STAR RUNNER - Achievements Module
+# Full achievements system, safe and integrated with profile
 
-PROFILE_FILE="$HOME/.star_runner_profile"
-CHECKSUM_FILE="$HOME/.star_runner_checksum"
-
-# Default values
-DEFAULT_PROFILE=$(cat << EOF
-player_name=""
-player_title=""
-player_gender=""
-player_birth_year=2000
-high_score=0
-crystal_bank=0
-total_crystals=0
-total_asteroids=0
-games_played=0
-last_level=1
-current_ship=1
-current_skin=1
-owned_ships="1"
-owned_skins="1"
-EOF
-)
+ACHIEVEMENTS_FILE="$HOME/.star_runner_achievements"
 
 # Colors
 COLOR_NEUTRAL="\e[0m"
+COLOR_YELLOW="\e[33m"
 COLOR_CYAN="\e[36m"
 COLOR_GREEN="\e[32m"
-COLOR_YELLOW="\e[33m"
-COLOR_RED="\e[31m"
 
 # -------------------------------
-# Helpers
+# Initialize achievements file
 # -------------------------------
-generate_checksum() {
-    if [[ -f "$PROFILE_FILE" ]]; then
-        if command -v sha256sum >/dev/null 2>&1; then
-            sha256sum "$PROFILE_FILE" | awk '{print $1}'
-        elif command -v shasum >/dev/null 2>&1; then
-            shasum -a 256 "$PROFILE_FILE" | awk '{print $1}'
-        else
-            md5sum "$PROFILE_FILE" | awk '{print $1}'
-        fi
+init_achievements() {
+    if [[ ! -f "$ACHIEVEMENTS_FILE" ]]; then
+        touch "$ACHIEVEMENTS_FILE"
+        chown "$USER":"$USER" "$ACHIEVEMENTS_FILE"
+        chmod 600 "$ACHIEVEMENTS_FILE"
     fi
 }
 
-verify_profile_integrity() {
-    [[ ! -f "$CHECKSUM_FILE" || ! -f "$PROFILE_FILE" ]] && return 1
-    [[ "$(generate_checksum)" == "$(cat "$CHECKSUM_FILE")" ]]
-}
-
-reset_profile() {
-    echo "$DEFAULT_PROFILE" > "$PROFILE_FILE"
-    echo "$(generate_checksum)" > "$CHECKSUM_FILE"
-}
-
-handle_tampered_profile() {
-    clear
-    printf "${COLOR_RED}╔═══════════════════════════════════════════════════════╗${COLOR_NEUTRAL}\n"
-    printf "${COLOR_RED}║${COLOR_NEUTRAL}                  ⚠️  SECURITY ALERT ⚠️                ${COLOR_RED}║${COLOR_NEUTRAL}\n"
-    printf "${COLOR_RED}╚═══════════════════════════════════════════════════════╝${COLOR_NEUTRAL}\n\n"
-    printf "  ${COLOR_YELLOW}Profile integrity failed or edited!${COLOR_NEUTRAL}\n"
-    printf "  ${COLOR_CYAN}Resetting profile to protect game integrity...${COLOR_NEUTRAL}\n"
-    sleep 4
-    reset_profile
-    create_new_profile
+# -------------------------------
+# Unlock a single achievement
+# -------------------------------
+unlock_achievement() {
+    local name="$1"
+    # Skip if already unlocked
+    if grep -q "^$name=true$" "$ACHIEVEMENTS_FILE" 2>/dev/null; then
+        return
+    fi
+    # Mark as unlocked
+    echo "$name=true" >> "$ACHIEVEMENTS_FILE"
+    printf "${COLOR_YELLOW}★ Achievement unlocked: %s ★${COLOR_NEUTRAL}\n" "$name"
 }
 
 # -------------------------------
-# Profile functions
+# Check and unlock achievements
+# Call inside game loop
 # -------------------------------
-init_profile() {
-    # 1️⃣ Create profile if missing
-    if [[ ! -f "$PROFILE_FILE" ]]; then
-        echo "$DEFAULT_PROFILE" > "$PROFILE_FILE"
-    fi
+check_achievements() {
+    # First Flight: start game
+    [ "$frame" -ge 1 ] && unlock_achievement "First Flight"
 
-    # 2️⃣ Create checksum if missing
-    if [[ ! -f "$CHECKSUM_FILE" ]]; then
-        echo "$(generate_checksum)" > "$CHECKSUM_FILE"
-    fi
+    # Survivor: survive 600 frames (~1 min)
+    [ "$frame" -ge 600 ] && unlock_achievement "Survivor"
 
-    # 3️⃣ Only trigger alert if profile exists AND integrity fails
-    if [[ -f "$PROFILE_FILE" && -f "$CHECKSUM_FILE" ]]; then
-        verify_profile_integrity || handle_tampered_profile
-    fi
+    # Collector: collect 100 crystals
+    [ "$crystals_collected" -ge 100 ] && unlock_achievement "Collector"
 
-    # 4️⃣ Load profile into shell variables
-    load_profile
+    # Level Up: reach level 5
+    [ "$level" -ge 5 ] && unlock_achievement "Level Up"
+
+    # Asteroid Destroyer: destroy 50 asteroids
+    [ "$asteroids_destroyed" -ge 50 ] && unlock_achievement "Asteroid Destroyer"
+
+    # Crystal Hoarder: bank 500 crystals
+    [ "$crystal_bank" -ge 500 ] && unlock_achievement "Crystal Hoarder"
+
+    # Speed Demon: reach level 10
+    [ "$level" -ge 10 ] && unlock_achievement "Speed Demon"
+
+    # Veteran: play 10 games
+    [ "$games_played" -ge 10 ] && unlock_achievement "Veteran"
+
+    # Master Pilot: reach level 20
+    [ "$level" -ge 20 ] && unlock_achievement "Master Pilot"
+
+    # Total Annihilation: destroy 200 asteroids
+    [ "$total_asteroids" -ge 200 ] && unlock_achievement "Total Annihilation"
+
+    # Ultimate Collector: collect 1000 crystals total
+    [ "$total_crystals" -ge 1000 ] && unlock_achievement "Ultimate Collector"
 }
 
-create_new_profile() {
-    clear
-    printf "${COLOR_CYAN}╔═══════════════════════════════════════════════════════╗${COLOR_NEUTRAL}\n"
-    printf "${COLOR_CYAN}║${COLOR_NEUTRAL}              WELCOME TO STAR RUNNER                   ${COLOR_CYAN}║${COLOR_NEUTRAL}\n"
-    printf "${COLOR_CYAN}╚═══════════════════════════════════════════════════════╝${COLOR_NEUTRAL}\n\n"
-
-    printf "  ${COLOR_GREEN}Creating new pilot profile...${COLOR_NEUTRAL}\n\n"
-
-    printf "  Enter your name: "
-    read -r player_name
-
-    printf "\n  Select gender:\n"
-    printf "  ${COLOR_CYAN}[1]${COLOR_NEUTRAL} Male\n"
-    printf "  ${COLOR_CYAN}[2]${COLOR_NEUTRAL} Female\n"
-    printf "  ${COLOR_CYAN}[3]${COLOR_NEUTRAL} Other\n"
-    printf "  Choice: "
-    read -r gender_choice
-
-    case $gender_choice in
-        1) player_gender="Male"; player_title="Sir" ;;
-        2) player_gender="Female"; player_title="Ma'am" ;;
-        3|*) player_gender="Other"; player_title="Mx" ;;
-    esac
-
-    printf "\n  Enter birth year (e.g., 2000): "
-    read -r player_birth_year
-    player_birth_year=$((player_birth_year + 0))
-
-    # Initialize stats
-    high_score=0
-    crystal_bank=0
-    total_crystals=0
-    total_asteroids=0
-    games_played=0
-    last_level=1
-    current_ship=1
-    current_skin=1
-    owned_ships="1"
-    owned_skins="1"
-
-    save_profile
-
-    printf "\n  ${COLOR_GREEN}✓ Profile created successfully!${COLOR_NEUTRAL}\n"
-    sleep 2
+# -------------------------------
+# List unlocked achievements
+# -------------------------------
+list_achievements() {
+    printf "${COLOR_CYAN}Unlocked Achievements:${COLOR_NEUTRAL}\n"
+    if [[ -f "$ACHIEVEMENTS_FILE" ]]; then
+        grep "=true$" "$ACHIEVEMENTS_FILE" | awk -F= '{print "★ "$1}'
+    else
+        echo "None"
+    fi
 }
 
-load_profile() {
-    [[ -f "$PROFILE_FILE" ]] && . "$PROFILE_FILE"
-
-    high_score=$((high_score + 0))
-    crystal_bank=$((crystal_bank + 0))
-    total_crystals=$((total_crystals + 0))
-    total_asteroids=$((total_asteroids + 0))
-    games_played=$((games_played + 0))
-    last_level=$((last_level + 0))
-    current_ship=$((current_ship + 0))
-    current_skin=$((current_skin + 0))
-    player_birth_year=$((player_birth_year + 0))
-}
-
-save_profile() {
-    cat > "$PROFILE_FILE" << EOF
-player_name="$player_name"
-player_title="$player_title"
-player_gender="$player_gender"
-player_birth_year=$player_birth_year
-high_score=$high_score
-crystal_bank=$crystal_bank
-total_crystals=$total_crystals
-total_asteroids=$total_asteroids
-games_played=$games_played
-last_level=$last_level
-current_ship=$current_ship
-current_skin=$current_skin
-owned_ships="$owned_ships"
-owned_skins="$owned_skins"
-EOF
-
-    # Update checksum
-    echo "$(generate_checksum)" > "$CHECKSUM_FILE"
+# -------------------------------
+# Reset achievements (if needed)
+# -------------------------------
+reset_achievements() {
+    rm -f "$ACHIEVEMENTS_FILE"
+    init_achievements
 }
 
 # -------------------------------
 # Initialize automatically
 # -------------------------------
-init_profile
+init_achievements
