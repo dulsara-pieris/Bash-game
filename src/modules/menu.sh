@@ -157,21 +157,38 @@ show_help() {
 }
 
 # Update game from git repository
+u# Update game from git repository
 update() {
-  set -e
   INSTALL_DIR="/usr/local/share/Star-runner"
   VERSION_FILE="$INSTALL_DIR/VERSION"
   
   # Check if installed
   if [[ ! -d "$INSTALL_DIR" ]]; then
     echo "❌ Star-runner is not installed in $INSTALL_DIR"
-    exit 1
+    return 1
   fi
   
+  # Check if we need sudo for git operations
+  if [ ! -w "$INSTALL_DIR/.git" ] && [ "$EUID" -ne 0 ]; then
+    echo "🔐 Update requires elevated permissions..."
+    echo "🔄 Re-running with sudo..."
+    
+    # Re-run this script with sudo and --update flag
+    if command -v star-runner >/dev/null 2>&1; then
+      sudo star-runner --update
+    else
+      # If not installed globally, find the script
+      SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+      sudo bash "$SCRIPT_PATH" --update
+    fi
+    return $?
+  fi
+  
+  set -e
   cd "$INSTALL_DIR"
   
   # Allow git as root
-  git config --global --add safe.directory "$INSTALL_DIR"
+  git config --global --add safe.directory "$INSTALL_DIR" 2>/dev/null || true
   
   # Read current version
   if [[ -f "$VERSION_FILE" ]]; then
@@ -185,13 +202,16 @@ update() {
   echo "📌 Current version: $CURRENT_VERSION"
   
   # Save rollback point
-  OLD_COMMIT=$(git rev-parse HEAD)
+  OLD_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
   
   echo "📥 Fetching updates…"
-  git fetch origin
+  if ! git fetch origin 2>/dev/null; then
+    echo "❌ Failed to fetch updates. Check your internet connection."
+    return 1
+  fi
   
   # Fast-forward merge
-  if git merge --ff-only origin/main; then
+  if git merge --ff-only origin/main 2>/dev/null; then
     # Read new version after update
     if [[ -f "$VERSION_FILE" ]]; then
       NEW_VERSION=$(cat "$VERSION_FILE" 2>/dev/null | head -n1 | xargs)
@@ -202,10 +222,15 @@ update() {
     
     echo "✅ Update successful!"
     echo "🆕 New version: $NEW_VERSION"
+    
+    # If we're root but was called by a user, show completion message
+    if [ "$EUID" -eq 0 ]; then
+      echo "✨ You can now run star-runner to play!"
+    fi
   else
     echo "❌ Update failed! Rolling back…"
-    git reset --hard "$OLD_COMMIT"
+    git reset --hard "$OLD_COMMIT" 2>/dev/null || true
     echo "↩️ Rolled back to $CURRENT_VERSION"
-    exit 1
+    return 1
   fi
 }
