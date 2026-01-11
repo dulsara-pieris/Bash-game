@@ -25,7 +25,7 @@ source "$SCRIPT_DIR/modules/weapons.sh"
 source "$SCRIPT_DIR/modules/collision.sh"
 source "$SCRIPT_DIR/modules/input.sh"
 source "$SCRIPT_DIR/modules/effects.sh"
-#source "$SCRIPT_DIR/modules/achievements.sh"
+source "$SCRIPT_DIR/modules/punishments.sh"
 source "$SCRIPT_DIR/modules/inventory.sh"   # Optional: career stats module
 
 # Init tamper-proof achievements
@@ -142,6 +142,7 @@ while true; do
     # --------------------------
     # Update entities
     # --------------------------
+    check_long_term_punishment
     move_asteroids
     move_crystal
     move_powerup
