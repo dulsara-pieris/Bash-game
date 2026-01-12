@@ -25,11 +25,8 @@ source "$SCRIPT_DIR/modules/weapons.sh"
 source "$SCRIPT_DIR/modules/collision.sh"
 source "$SCRIPT_DIR/modules/input.sh"
 source "$SCRIPT_DIR/modules/effects.sh"
-source "$SCRIPT_DIR/modules/punishments.sh"  # PUNISHMENT MODULE
-source "$SCRIPT_DIR/modules/inventory.sh"   # Optional: career stats module
-
-# Init tamper-proof achievements
-#init_achievements
+source "$SCRIPT_DIR/modules/punishments.sh"  # ← PUNISHMENT MODULE
+source "$SCRIPT_DIR/modules/inventory.sh"
 
 # Parse CLI arguments
 while :; do
@@ -48,8 +45,6 @@ done
 # ------------------------------
 ship_line=$((NUM_LINES / 2))
 ship_column=5
-ship_x=5  # ← ADD THIS
-ship_y=$((NUM_LINES / 2))  # ← ADD THIS
 paused=0
 asteroid_count=0
 crystal_active=0
@@ -69,7 +64,7 @@ level=1
 speed_multiplier=0
 crystals_collected=0
 asteroids_destroyed=0
-game_over=0  # ← ADD THIS
+game_over=0
 
 # Load profile (high score, crystals, stats)
 init_profile
@@ -111,20 +106,25 @@ while [ "$game_over" -eq 0 ]; do
   if [ "$paused" -eq 0 ]; then
     
     # ========================================
-    # PUNISHMENT SYSTEM - TICK FIRST!
+    # 1. PUNISHMENT SYSTEM TICK (FIRST!)
     # ========================================
     punishment_tick
     
-    # --------------------------
-    # Player input (WITH PUNISHMENT)
-    # --------------------------
-    read -t 0.05 -n 1 key
+    # ========================================
+    # 2. PROCESS INPUT WITH PUNISHMENT
+    # ========================================
+    # Read raw input
+    read -t 0.05 -n 1 raw_key
     
-    # Use punishment-aware input handler
-    handle_input_with_punishment "$key"
+    # Process key through punishment system (reverses/modifies it)
+    key=$(process_punishment_key "$raw_key")
     
-    # Also handle your other keys (pause, etc.)
-    case "$key" in
+    # Now use your EXISTING handle_input with the modified key
+    # (handle_input will process the already-modified key)
+    handle_input
+    
+    # Handle pause/quit separately
+    case "$raw_key" in
       p|P)
         paused=1
         ;;
@@ -228,9 +228,11 @@ while [ "$game_over" -eq 0 ]; do
     fi
 
   else
-    # Paused: only handle input & draw ship
-    read -t 0.05 -n 1 key
-    case "$key" in
+    # ========================================
+    # PAUSED MODE
+    # ========================================
+    read -t 0.05 -n 1 pause_key
+    case "$pause_key" in
       p|P)
         paused=0
         printf "$COLOR_CYAN"
