@@ -58,6 +58,90 @@ INVERTED_SCREEN=0
 SUPER_SPEED_ASTEROIDS=0
 
 # ------------------------------
+# Helper function to safely get ship speed
+# ------------------------------
+safe_get_ship_speed() {
+    local ship_id=$1
+    # Return speed based on ship type if get_ship_speed doesn't exist
+    if type get_ship_speed &>/dev/null; then
+        get_ship_speed "$ship_id"
+    else
+        case $ship_id in
+            1) echo 2 ;;
+            2) echo 3 ;;
+            3) echo 4 ;;
+            *) echo 3 ;;
+        esac
+    fi
+}
+
+# ------------------------------
+# Helper function to safely set ship speed
+# ------------------------------
+safe_set_ship_speed() {
+    local ship_id=$1
+    local speed=$2
+    # Only set if function exists
+    if type set_ship_speed &>/dev/null; then
+        set_ship_speed "$ship_id" "$speed"
+    fi
+}
+
+# ------------------------------
+# Helper function to safely get ship ammo
+# ------------------------------
+safe_get_ship_ammo() {
+    local ship_id=$1
+    # Return ammo based on ship type if get_ship_ammo doesn't exist
+    if type get_ship_ammo &>/dev/null; then
+        get_ship_ammo "$ship_id"
+    else
+        case $ship_id in
+            1) echo 10 ;;
+            2) echo 20 ;;
+            3) echo 30 ;;
+            *) echo 20 ;;
+        esac
+    fi
+}
+
+# ------------------------------
+# Helper function to safely spawn asteroids
+# ------------------------------
+safe_spawn_asteroid() {
+    if type spawn_asteroid &>/dev/null; then
+        spawn_asteroid
+    fi
+}
+
+# ------------------------------
+# Helper function to safely draw ship
+# ------------------------------
+safe_draw_ship() {
+    if type draw_ship &>/dev/null; then
+        draw_ship
+    fi
+}
+
+# ------------------------------
+# Helper function to safely draw border
+# ------------------------------
+safe_draw_border() {
+    if type draw_border &>/dev/null; then
+        draw_border
+    fi
+}
+
+# ------------------------------
+# Helper function to safely save profile
+# ------------------------------
+safe_save_profile() {
+    if type save_profile &>/dev/null; then
+        save_profile
+    fi
+}
+
+# ------------------------------
 # Backup original profile
 # ------------------------------
 backup_profile_for_punishment() {
@@ -100,8 +184,8 @@ restore_profile_after_punishment() {
     INVERTED_SCREEN=0
     SUPER_SPEED_ASTEROIDS=0
 
-    save_profile
-    printf "$COLOR_GREEN ✓ Punishment expired! Profile restored. Don't mess up again! $COLOR_NEUTRAL\n"
+    safe_save_profile
+    printf "${COLOR_GREEN:-\033[32m} ✓ Punishment expired! Profile restored. Don't mess up again! ${COLOR_NEUTRAL:-\033[0m}\n"
 }
 
 # ------------------------------
@@ -152,9 +236,9 @@ apply_long_term_punishment() {
         elif [ "$punishment_level" -eq 3 ]; then
             player_name="xXx_${base_name}_xXx"
         elif [ "$punishment_level" -eq 4 ]; then
-            player_name="💩${base_name}💩"
+            player_name="${base_name}_FAIL"
         elif [ "$punishment_level" -ge 5 ]; then
-            player_name="☠ULTIMATE_${base_name}_666☠"
+            player_name="ULTIMATE_${base_name}_666"
         else
             player_name="$base_name"
         fi
@@ -168,7 +252,7 @@ apply_long_term_punishment() {
         # Make name PERMANENT if level >= 3 (BRUTAL)
         if [ "$punishment_level" -ge 3 ]; then
             punishment_backup_name="$player_name"
-            printf "$COLOR_RED ☠ YOUR SHAMEFUL NAME IS NOW PERMANENT! ☠ $COLOR_NEUTRAL\n"
+            printf "${COLOR_RED:-\033[31m} ☠ YOUR SHAMEFUL NAME IS NOW PERMANENT! ☠ ${COLOR_NEUTRAL:-\033[0m}\n"
         fi
 
         # Activate PROGRESSIVE super punishments
@@ -192,20 +276,19 @@ apply_long_term_punishment() {
         fi
         if [ "$punishment_level" -ge 5 ]; then
             SHRINKING_SHIP_ACTIVE=1
-            # MAXIMUM PUNISHMENT - reduce speed to 1
-            set_ship_speed "$current_ship" 1
-            printf "$COLOR_RED\n"
+            # MAXIMUM PUNISHMENT
+            printf "${COLOR_RED:-\033[31m}\n"
             printf "╔═══════════════════════════════════════════╗\n"
             printf "║  ☠ MAXIMUM PUNISHMENT ACTIVATED ☠        ║\n"
             printf "║  YOU ARE THE WORST PILOT IN THE GALAXY!  ║\n"
             printf "║  SHAME! SHAME! SHAME!                    ║\n"
             printf "╚═══════════════════════════════════════════╝\n"
-            printf "$COLOR_NEUTRAL\n"
+            printf "${COLOR_NEUTRAL:-\033[0m}\n"
         fi
 
-        save_profile
+        safe_save_profile
         
-        printf "$COLOR_RED\n"
+        printf "${COLOR_RED:-\033[31m}\n"
         printf "⚠⚠⚠ PUNISHMENT ESCALATED TO LEVEL $punishment_level ⚠⚠⚠\n"
         printf "╔═══════════════════════════════════════════╗\n"
         printf "║ Name: %-37s ║\n" "$player_name"
@@ -221,7 +304,7 @@ apply_long_term_punishment() {
         [ "$INVERTED_SCREEN" -eq 1 ] && printf "║ 🙃 INVERTED SCREEN ACTIVE                 ║\n"
         [ "$SUPER_SPEED_ASTEROIDS" -eq 1 ] && printf "║ ⚡ SUPER SPEED ASTEROIDS ACTIVE           ║\n"
         printf "╚═══════════════════════════════════════════╝\n"
-        printf "$COLOR_NEUTRAL\n"
+        printf "${COLOR_NEUTRAL:-\033[0m}\n"
         
         return
     fi
@@ -255,9 +338,9 @@ apply_long_term_punishment() {
     ammo=$((ammo / 2))
     [ "$ammo" -lt 1 ] && ammo=1
 
-    save_profile
+    safe_save_profile
     
-    printf "$COLOR_RED\n"
+    printf "${COLOR_RED:-\033[31m}\n"
     printf "╔═══════════════════════════════════════════╗\n"
     printf "║    ⚠ PUNISHMENT ACTIVATED ⚠              ║\n"
     printf "║ You have brought shame upon yourself!    ║\n"
@@ -267,7 +350,7 @@ apply_long_term_punishment() {
     printf "║ Title: %-36s ║\n" "$player_title"
     printf "║ Gender: %-35s ║\n" "$player_gender"
     printf "╚═══════════════════════════════════════════╝\n"
-    printf "$COLOR_NEUTRAL\n"
+    printf "${COLOR_NEUTRAL:-\033[0m}\n"
 }
 
 # ------------------------------
@@ -301,16 +384,16 @@ apply_short_punishment() {
         "✗ WORTHLESS PILOT DETECTED!"
         "✗ GARBAGE! ABSOLUTE GARBAGE!"
     )
-    printf "\n$COLOR_RED ${messages[$RANDOM % ${#messages[@]}]} $COLOR_NEUTRAL\n"
+    printf "\n${COLOR_RED:-\033[31m} ${messages[$RANDOM % ${#messages[@]}]} ${COLOR_NEUTRAL:-\033[0m}\n"
 
     # Save original values
     PUNISHMENT_OLD_SKIN="$current_skin"
-    PUNISHMENT_OLD_SPEED=$(get_ship_speed "$current_ship")
+    PUNISHMENT_OLD_SPEED=$(safe_get_ship_speed "$current_ship")
 
     # HARSH penalties
     local new_speed=$((PUNISHMENT_OLD_SPEED - 2))
     [ "$new_speed" -lt 1 ] && new_speed=1
-    set_ship_speed "$current_ship" "$new_speed"
+    safe_set_ship_speed "$current_ship" "$new_speed"
 
     # Brutal ammo reduction
     ammo=$((ammo / 4))
@@ -324,20 +407,20 @@ apply_short_punishment() {
     local asteroid_count=8
     if [ "$score" -lt "$SUPER_PUNISHMENT_THRESHOLD" ]; then
         asteroid_count=15
-        printf "$COLOR_RED ☠ SUPER PUNISHMENT ACTIVATED! ☠ $COLOR_NEUTRAL\n"
+        printf "${COLOR_RED:-\033[31m} ☠ SUPER PUNISHMENT ACTIVATED! ☠ ${COLOR_NEUTRAL:-\033[0m}\n"
     fi
     if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
         asteroid_count=25
-        printf "$COLOR_RED\n"
+        printf "${COLOR_RED:-\033[31m}\n"
         printf "╔═══════════════════════════════════════════╗\n"
         printf "║ ☠☠☠ EXTREME LOSER DETECTED! ☠☠☠          ║\n"
         printf "║ YOU ARE A DISGRACE TO ALL PILOTS!        ║\n"
         printf "╚═══════════════════════════════════════════╝\n"
-        printf "$COLOR_NEUTRAL\n"
+        printf "${COLOR_NEUTRAL:-\033[0m}\n"
     fi
     
     for i in $(seq 1 $asteroid_count); do
-        spawn_asteroid
+        safe_spawn_asteroid
     done
 
     # Force ugliest skin
@@ -348,27 +431,27 @@ apply_short_punishment() {
     case $effect in
         0)
             INVERTED_SCREEN=1
-            printf "$COLOR_YELLOW 🙃 SCREEN INVERTED! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} 🙃 SCREEN INVERTED! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
         1)
             REVERSE_CONTROLS_ACTIVE=1
-            printf "$COLOR_YELLOW ⬅➡ CONTROLS REVERSED! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} ⬅➡ CONTROLS REVERSED! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
         2)
             DRUNK_MODE_ACTIVE=1
-            printf "$COLOR_YELLOW 🍺 DRUNK MODE! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} 🍺 DRUNK MODE! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
         3)
             SHRINKING_SHIP_ACTIVE=1
-            printf "$COLOR_YELLOW 📉 SHIP SHRINKING! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} 📉 SHIP SHRINKING! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
         4)
             RANDOM_TELEPORT_ACTIVE=1
-            printf "$COLOR_YELLOW 🌀 RANDOM TELEPORTS! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} 🌀 RANDOM TELEPORTS! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
         5)
             SUPER_SPEED_ASTEROIDS=1
-            printf "$COLOR_YELLOW ⚡ SUPER SPEED ASTEROIDS! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} ⚡ SUPER SPEED ASTEROIDS! ${COLOR_NEUTRAL:-\033[0m}\n"
             ;;
     esac
 }
@@ -390,24 +473,26 @@ punishment_tick() {
 
     # Apply DRUNK MODE - random jerky movements
     if [ "$DRUNK_MODE_ACTIVE" -eq 1 ]; then
-        if [ $((RANDOM % 4)) -eq 0 ]; then
+        if [ $((RANDOM % 4)) -eq 0 ] && [ -n "${ship_y:-}" ] && [ -n "${ship_x:-}" ]; then
             local drift=$((RANDOM % 3 - 1))
             ship_y=$((ship_y + drift))
             ship_x=$((ship_x + drift))
             # Boundary check
-            [ "$ship_y" -lt 2 ] && ship_y=2
-            [ "$ship_y" -gt $((HEIGHT - 3)) ] && ship_y=$((HEIGHT - 3))
-            [ "$ship_x" -lt 2 ] && ship_x=2
-            [ "$ship_x" -gt $((WIDTH - 10)) ] && ship_x=$((WIDTH - 10))
+            [ -n "${HEIGHT:-}" ] && [ -n "${WIDTH:-}" ] && {
+                [ "$ship_y" -lt 2 ] && ship_y=2
+                [ "$ship_y" -gt $((HEIGHT - 3)) ] && ship_y=$((HEIGHT - 3))
+                [ "$ship_x" -lt 2 ] && ship_x=2
+                [ "$ship_x" -gt $((WIDTH - 10)) ] && ship_x=$((WIDTH - 10))
+            }
         fi
     fi
 
     # Apply RANDOM TELEPORT - actually teleport the ship
     if [ "$RANDOM_TELEPORT_ACTIVE" -eq 1 ]; then
-        if [ $((RANDOM % 30)) -eq 0 ]; then
+        if [ $((RANDOM % 30)) -eq 0 ] && [ -n "${WIDTH:-}" ] && [ -n "${HEIGHT:-}" ]; then
             ship_x=$((RANDOM % (WIDTH - 15) + 5))
             ship_y=$((RANDOM % (HEIGHT - 8) + 4))
-            printf "$COLOR_YELLOW ⚡ TELEPORTED! $COLOR_NEUTRAL\n"
+            printf "${COLOR_YELLOW:-\033[33m} ⚡ TELEPORTED! ${COLOR_NEUTRAL:-\033[0m}\n"
             blink_ship_effect
         fi
     fi
@@ -427,8 +512,8 @@ punishment_tick() {
     fi
 
     # Blink effect during punishment
-    if [ $((frame % 7)) -eq 0 ]; then
-        draw_ship
+    if [ -n "${frame:-}" ] && [ $((frame % 7)) -eq 0 ]; then
+        safe_draw_ship
     fi
 
     # Countdown timer
@@ -440,8 +525,8 @@ punishment_tick() {
         
         # Restore original values
         current_skin="$PUNISHMENT_OLD_SKIN"
-        set_ship_speed "$current_ship" "$PUNISHMENT_OLD_SPEED"
-        ammo=$(get_ship_ammo "$current_ship")
+        safe_set_ship_speed "$current_ship" "$PUNISHMENT_OLD_SPEED"
+        ammo=$(safe_get_ship_ammo "$current_ship")
         
         # Clear all temporary effects
         REVERSE_CONTROLS_ACTIVE=0
@@ -454,7 +539,7 @@ punishment_tick() {
         export SHIP_SHRINK_FACTOR=100
         export ASTEROID_SPEED_MULTIPLIER=1
         
-        printf "$COLOR_GREEN ✓ Punishment ended! Try to be less terrible! $COLOR_NEUTRAL\n"
+        printf "${COLOR_GREEN:-\033[32m} ✓ Punishment ended! Try to be less terrible! ${COLOR_NEUTRAL:-\033[0m}\n"
     fi
 }
 
@@ -463,20 +548,26 @@ punishment_tick() {
 # ------------------------------
 blink_ship_effect() {
     for i in {1..4}; do
-        tput cup "$ship_y" "$ship_x"
-        printf "   "
-        sleep 0.08
-        draw_ship
-        sleep 0.08
+        if [ -n "${ship_y:-}" ] && [ -n "${ship_x:-}" ]; then
+            # Only execute tput if in terminal
+            if [ -t 1 ]; then
+                tput cup "$ship_y" "$ship_x" 2>/dev/null && printf "   "
+            fi
+            sleep 0.08
+            safe_draw_ship
+            sleep 0.08
+        fi
     done
 }
 
 shake_screen_effect() {
-    for i in {1..8}; do
-        tput cup $((RANDOM % 4)) $((RANDOM % 4))
-        sleep 0.04
-    done
-    tput cup 0 0
+    if [ -t 1 ]; then
+        for i in {1..8}; do
+            tput cup $((RANDOM % 4)) $((RANDOM % 4)) 2>/dev/null
+            sleep 0.04
+        done
+        tput cup 0 0 2>/dev/null
+    fi
 }
 
 # ------------------------------
@@ -497,23 +588,23 @@ generate_insult() {
         "Git gud, SCRUB!"
         "You're making EVERYONE look bad!"
     )
-    printf "$COLOR_RED ► ${insults[$RANDOM % ${#insults[@]}]} $COLOR_NEUTRAL\n"
+    printf "${COLOR_RED:-\033[31m} ► ${insults[$RANDOM % ${#insults[@]}]} ${COLOR_NEUTRAL:-\033[0m}\n"
 }
 
 # ------------------------------
 # Main punishment trigger
 # ------------------------------
 check_low_score_punishment() {
-    if [ "$score" -lt "$LOW_SCORE_THRESHOLD" ]; then
+    if [ "${score:-0}" -lt "$LOW_SCORE_THRESHOLD" ]; then
         apply_short_punishment
         apply_long_term_punishment
         
         # Extra insults for terrible players
-        if [ "$score" -lt "$SUPER_PUNISHMENT_THRESHOLD" ]; then
+        if [ "${score:-0}" -lt "$SUPER_PUNISHMENT_THRESHOLD" ]; then
             generate_insult
         fi
         
-        if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
+        if [ "${score:-0}" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
             generate_insult
             generate_insult
         fi
@@ -523,37 +614,37 @@ check_low_score_punishment() {
 # ------------------------------
 # Hall of Shame
 # ------------------------------
-SHAME_FILE="${GAME_DIR}/.hall_of_shame"
+SHAME_FILE="${GAME_DIR:-.}/.hall_of_shame"
 
 add_to_hall_of_shame() {
     local shame_score=$1
     local shame_name=$2
     echo "$shame_score|$shame_name|$(date '+%Y-%m-%d %H:%M')" >> "$SHAME_FILE"
-    printf "$COLOR_RED\n"
+    printf "${COLOR_RED:-\033[31m}\n"
     printf "╔═══════════════════════════════════════════╗\n"
     printf "║  📜 ADDED TO HALL OF SHAME! 📜            ║\n"
     printf "║  Your failure is now PERMANENT!          ║\n"
     printf "╚═══════════════════════════════════════════╝\n"
-    printf "$COLOR_NEUTRAL\n"
+    printf "${COLOR_NEUTRAL:-\033[0m}\n"
 }
 
 show_hall_of_shame() {
     if [ -f "$SHAME_FILE" ]; then
-        printf "\n$COLOR_RED"
+        printf "\n${COLOR_RED:-\033[31m}"
         printf "╔═══════════════════════════════════════════╗\n"
         printf "║         HALL OF SHAME (Top 10)           ║\n"
         printf "╠═══════════════════════════════════════════╣\n"
-        sort -t'|' -k1 -n "$SHAME_FILE" | head -10 | while IFS='|' read -r score name datetime; do
+        sort -t'|' -k1 -n "$SHAME_FILE" 2>/dev/null | head -10 | while IFS='|' read -r score name datetime; do
             printf "║ %-5s | %-20s | %-10s ║\n" "$score" "${name:0:20}" "${datetime:0:10}"
         done
         printf "╚═══════════════════════════════════════════╝\n"
-        printf "$COLOR_NEUTRAL\n"
+        printf "${COLOR_NEUTRAL:-\033[0m}\n"
     fi
 }
 
 # Auto-add to shame on game over if score is terrible
 check_and_add_to_shame() {
-    if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
-        add_to_hall_of_shame "$score" "$player_name"
+    if [ "${score:-0}" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
+        add_to_hall_of_shame "${score:-0}" "${player_name:-Unknown}"
     fi
 }
