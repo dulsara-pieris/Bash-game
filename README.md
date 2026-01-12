@@ -46,13 +46,12 @@ This will:
 
 ## 🎮 Controls
 
-| Key        | Action                                 |
-| ---------- | -------------------------------------- |
-| Arrow Keys | Move your ship (Up, Down, Left, Right) |
-| Spacebar   | Fire Laser (consumes 1 ammo)           |
-| P          | Pause and unpause                      |
-| Q          | Quit & Save Stats can recive           |
-|              punishments                            |
+| Key        | Action                                     |
+| ---------- | -------------------------------------------|
+| Arrow Keys | Move your ship (Up, Down, Left, Right)     |
+| Spacebar   | Fire Laser (consumes 1 ammo)               |
+| P          | Pause and unpause                          |
+| Q          | Quit & Save Stats can recive punishments   |
 
 ---
 
