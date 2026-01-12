@@ -1,181 +1,158 @@
 #!/usr/bin/env python3
-
 """
-SYNAPSNEX OSS-Protection License (SOPL) v1.0
-Copyright (c) 2026 Dulsara Pieris
-
-STAR RUNNER ENHANCED — Python Edition
-Main Game Entry Point
+Star Runner — Main Entry Point (Python)
 """
 
-import sys
 import time
-import argparse
-
-# Core
-from core.config import *
-from core.utils import *
-from core.input import handle_input
+import sys
+from core.config import NUM_LINES, NUM_COLUMNS, COLOR_CYAN, COLOR_GREEN, COLOR_NEUTRAL
 from core.render import (
-    on_enter, draw_border, draw_ship, draw_hud, draw_stars, move_cursor
+    on_enter, on_exit, draw_border, draw_ship, draw_hud, draw_stars, move_cursor, colored
 )
+from core.input import handle_input, parse_cli_args
 from core.menu import show_main_menu
 from core.effects import launch_sequence
-
-# Player
 from player.profile import init_profile, save_profile
 from player.ships import get_ship_ammo
-from player.skins import *
-
-# Game
-from game.entities import *
-from game.collision import *
-from game.weapons import *
+from game.entities import spawn_asteroid, spawn_crystal, spawn_powerup, move_asteroids, move_crystal, move_powerup
+from game.weapons import move_lasers, fire_laser, render_lasers
+from game.collision import check_collisions, check_laser_hits
 from game.punishments import check_long_term_punishment
-from game.inventory import *
-
-# Shop
-from shop.shop import *
+from game.inventory import update_career_stats, calculate_rank
 
 # ------------------------------
-# CLI ARGUMENTS
+# Game State
 # ------------------------------
 
-def parse_args():
-    parser = argparse.ArgumentParser(prog="star-runner")
-    parser.add_argument("-u", "--update", action="store_true")
-    return parser.parse_args()
-
-
-# ------------------------------
-# GAME INITIALIZATION
-# ------------------------------
-
-def init_game_state():
-    return {
-        "ship_line": NUM_LINES // 2,
-        "ship_column": 5,
-        "paused": False,
-        "frame": 0,
-        "score": 0,
-        "level": 1,
-        "speed_multiplier": 0,
-
-        "ammo": 0,
-        "weapon_type": 1,
-        "weapon_timer": 0,
-
-        "laser_active": False,
-        "shield_active": False,
-        "shield_timer": 0,
-        "super_mode_active": False,
-        "super_timer": 0,
-
-        "crystals_collected": 0,
-        "asteroids_destroyed": 0,
-    }
-
+state = {
+    "ship_line": NUM_LINES // 2,
+    "ship_column": 5,
+    "paused": 0,
+    "asteroid_count": 0,
+    "crystal_active": 0,
+    "powerup_active": 0,
+    "laser_active": 0,
+    "shield_active": 0,
+    "super_mode_active": 0,
+    "weapon_type": 1,
+    "frame": 0,
+    "score": 0,
+    "level": 1,
+    "speed_multiplier": 0,
+    "crystals_collected": 0,
+    "asteroids_destroyed": 0,
+    "ammo": 10,
+    "shield_active": False,
+    "super_mode_active": False
+}
 
 # ------------------------------
-# MAIN GAME LOOP
+# Initialize profile
 # ------------------------------
+profile = init_profile()
 
-def game_loop(state, profile):
-    on_enter()
-    draw_border()
-    draw_ship(state)
+# ------------------------------
+# Show main menu
+# ------------------------------
+show_main_menu(profile)
 
-    launch_sequence()
+# ------------------------------
+# Set ammo based on selected ship
+# ------------------------------
+current_ship = profile.get("current_ship", 0)
+state["ammo"] = get_ship_ammo(current_ship)
 
+# ------------------------------
+# Configure terminal input
+# ------------------------------
+# (handled in core.input if needed)
+
+# ------------------------------
+# Initialize screen
+# ------------------------------
+on_enter()
+draw_border()
+draw_ship(state)
+
+# ------------------------------
+# Launch sequence
+# ------------------------------
+print(COLOR_CYAN)
+launch_sequence()
+time.sleep(2)
+# Clear banner
+move_cursor(NUM_LINES // 2, 0)
+print(" " * NUM_COLUMNS)
+
+# ------------------------------
+# Main Game Loop
+# ------------------------------
+try:
     while True:
-        if not state["paused"]:
+        if state["paused"] == 0:
+            # Player input
             handle_input(state)
 
-            # --------------------------
-            # LEVEL PROGRESSION
-            # --------------------------
+            # Level progression
             new_level = state["score"] // 200 + 1
             if new_level != state["level"]:
                 state["level"] = new_level
                 state["speed_multiplier"] = new_level - 1
-                level_up_banner(new_level)
+                # Level-up notification
+                center_text(f"★ LEVEL {state['level']} ★")
+                time.sleep(1)
+                move_cursor(NUM_LINES // 2, 0)
+                print(" " * NUM_COLUMNS)
 
-            # --------------------------
-            # BACKGROUND & SPAWNING
-            # --------------------------
+            # Background and spawning
             if state["frame"] % 10 == 0:
                 draw_stars()
-
-            spawn_freq = max(2, 4 - state["speed_multiplier"])
+            spawn_freq = max(4 - state["speed_multiplier"], 2)
             if state["frame"] % spawn_freq == 0:
                 spawn_asteroid()
-
             if state["frame"] % 20 == 0:
                 spawn_crystal()
                 spawn_powerup()
 
-            # --------------------------
-            # UPDATE ENTITIES
-            # --------------------------
+            # Update entities
             check_long_term_punishment(profile)
             move_asteroids()
             move_crystal()
             move_powerup()
             move_lasers()
 
-            # --------------------------
-            # COLLISIONS & TIMERS
-            # --------------------------
+            # Collisions & timers
             check_laser_hits(state)
             check_collisions(state)
-            update_timers(state)
 
-            # --------------------------
-            # RENDER
-            # --------------------------
+            # Render frame
             draw_ship(state)
+            render_lasers()
             draw_hud(state, profile)
 
-            # --------------------------
-            # STATS UPDATE
-            # --------------------------
-            profile["high_score"] = max(profile["high_score"], state["score"])
-            profile["total_crystals"] += state["crystals_collected"]
-            profile["total_asteroids"] += state["asteroids_destroyed"]
-            profile["crystals_bank"] += state["crystals_collected"]
+            # Increment frame
+            state["frame"] += 1
 
+            # Update career stats
+            update_career_stats(state, profile)
+
+            # Rank calculation
+            rank = calculate_rank(profile)
+
+            # Save profile periodically
             save_profile(profile)
 
-            state["frame"] += 1
-            time.sleep(TURN_DURATION)
-
         else:
+            # Paused: only handle input & draw ship
             handle_input(state)
             draw_ship(state)
 
+        # Frame delay
+        time.sleep(0.05)  # adjust speed as needed
 
-# ------------------------------
-# ENTRY POINT
-# ------------------------------
-
-def main():
-    args = parse_args()
-
-    if args.update:
-        update_game()
-        sys.exit(0)
-
-    profile = init_profile()
-    show_main_menu(profile)
-
-    state = init_game_state()
-    state["ammo"] = get_ship_ammo(profile["current_ship"])
-
-    game_loop(state, profile)
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        cleanup_and_exit()
+except KeyboardInterrupt:
+    # Exit gracefully
+    on_exit()
+    save_profile(profile)
+    print("\nExiting Star Runner. Goodbye!")
+    sys.exit(0)
