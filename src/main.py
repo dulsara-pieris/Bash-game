@@ -9,7 +9,7 @@ from core.config import NUM_LINES, NUM_COLUMNS, COLOR_CYAN, COLOR_GREEN, COLOR_N
 from core.render import (
     on_enter, on_exit, draw_border, draw_ship, draw_hud, draw_stars, move_cursor, colored
 )
-from core.input import handle_input, parse_cli_args
+from core.input import handle_input
 from core.menu import show_main_menu
 from core.effects import launch_sequence
 from player.profile import init_profile, save_profile
