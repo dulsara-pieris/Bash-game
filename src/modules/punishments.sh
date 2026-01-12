@@ -4,6 +4,29 @@
 # Author: Dulsara Pieris (SYNAPSNEX)
 # Handles long-term and short-term punishments - MUCH WORSE FOR LOSERS
 
+# ============================================================================
+# INTEGRATION INSTRUCTIONS - HOW TO USE IN YOUR MAIN GAME LOOP
+# ============================================================================
+#
+# 1. Source this file in your main game script:
+#    source ./punishments.sh
+#
+# 2. In your GAME LOOP, add this BEFORE reading input:
+#    punishment_tick
+#
+# 3. Replace your input handling code with:
+#    read -t 0.05 -n 1 key
+#    key=$(apply_punished_movement "$key")  # This applies reverse controls!
+#
+# 4. For ship movement, use the function instead of direct assignment:
+#    # OLD WAY:
+#    # case "$key" in
+#   #!/usr/bin/env bash
+
+# STAR RUNNER - BRUTAL Punishments Module (MAXIMUM HUMILIATION)
+# Author: Dulsara Pieris (SYNAPSNEX)
+# Handles long-term and short-term punishments - MUCH WORSE FOR LOSERS
+
 # ------------------------------
 # Config
 # ------------------------------
@@ -457,23 +480,32 @@ apply_short_punishment() {
 }
 
 # ------------------------------
-# Punishment tick - ACTUALLY APPLY EFFECTS
+# Process input with reverse controls
 # ------------------------------
-punishment_tick() {
-    if [ "$PUNISHMENT_ACTIVE" -eq 0 ]; then
-        return
-    fi
-
-    # Apply REVERSE CONTROLS (swap input handling)
+process_punishment_input() {
+    local input="$1"
+    local output="$input"
+    
+    # Reverse controls if active
     if [ "$REVERSE_CONTROLS_ACTIVE" -eq 1 ]; then
-        # This needs to be handled in main game loop input section
-        # Set flag for input reversal
-        export CONTROLS_REVERSED=1
+        case "$input" in
+            w|W) output="s" ;;
+            s|S) output="w" ;;
+            a|A) output="d" ;;
+            d|D) output="a" ;;
+            *) output="$input" ;;
+        esac
     fi
+    
+    echo "$output"
+}
 
-    # Apply DRUNK MODE - random jerky movements
-    if [ "$DRUNK_MODE_ACTIVE" -eq 1 ]; then
-        if [ $((RANDOM % 4)) -eq 0 ] && [ -n "${ship_y:-}" ] && [ -n "${ship_x:-}" ]; then
+# ------------------------------
+# Apply drunk mode ship drift
+# ------------------------------
+apply_drunk_drift() {
+    if [ "$DRUNK_MODE_ACTIVE" -eq 1 ] && [ -n "${ship_y:-}" ] && [ -n "${ship_x:-}" ]; then
+        if [ $((RANDOM % 4)) -eq 0 ]; then
             local drift=$((RANDOM % 3 - 1))
             ship_y=$((ship_y + drift))
             ship_x=$((ship_x + drift))
@@ -486,61 +518,143 @@ punishment_tick() {
             }
         fi
     fi
+}
 
-    # Apply RANDOM TELEPORT - actually teleport the ship
-    if [ "$RANDOM_TELEPORT_ACTIVE" -eq 1 ]; then
-        if [ $((RANDOM % 30)) -eq 0 ] && [ -n "${WIDTH:-}" ] && [ -n "${HEIGHT:-}" ]; then
+# ------------------------------
+# Check and apply random teleport
+# ------------------------------
+apply_random_teleport() {
+    if [ "$RANDOM_TELEPORT_ACTIVE" -eq 1 ] && [ -n "${WIDTH:-}" ] && [ -n "${HEIGHT:-}" ]; then
+        if [ $((RANDOM % 30)) -eq 0 ]; then
             ship_x=$((RANDOM % (WIDTH - 15) + 5))
             ship_y=$((RANDOM % (HEIGHT - 8) + 4))
             printf "${COLOR_YELLOW:-\033[33m} ⚡ TELEPORTED! ${COLOR_NEUTRAL:-\033[0m}\n"
             blink_ship_effect
         fi
     fi
+}
 
-    # Apply SHRINKING SHIP - reduce ship size temporarily
+# ------------------------------
+# Get ship size scale factor
+# ------------------------------
+get_ship_scale() {
     if [ "$SHRINKING_SHIP_ACTIVE" -eq 1 ]; then
-        export SHIP_SHRINK_FACTOR=$((50 + (PUNISHMENT_TIMER % 50)))
+        echo "$((50 + (PUNISHMENT_TIMER % 50)))"
     else
-        export SHIP_SHRINK_FACTOR=100
+        echo "100"
+    fi
+}
+
+# ------------------------------
+# Get asteroid speed multiplier
+# ------------------------------
+get_asteroid_speed_multiplier() {
+    if [ "$SUPER_SPEED_ASTEROIDS" -eq 1 ]; then
+        echo "3"
+    else
+        echo "1"
+    fi
+}
+
+# ------------------------------
+# Check if screen should be inverted
+# ------------------------------
+is_screen_inverted() {
+    [ "$INVERTED_SCREEN" -eq 1 ] && return 0 || return 1
+}
+
+# ------------------------------
+# Punishment tick - ACTUALLY APPLY EFFECTS
+# ------------------------------
+punishment_tick() {
+    if [ "$PUNISHMENT_ACTIVE" -eq 0 ] && [ "$punishment_level" -eq 0 ]; then
+        return
     fi
 
-    # Apply SUPER SPEED ASTEROIDS - increase asteroid speed
-    if [ "$SUPER_SPEED_ASTEROIDS" -eq 1 ]; then
-        export ASTEROID_SPEED_MULTIPLIER=3
-    else
-        export ASTEROID_SPEED_MULTIPLIER=1
-    fi
+    # Apply drunk mode drift
+    apply_drunk_drift
+    
+    # Apply random teleport
+    apply_random_teleport
+
+    # Set global flags for other systems to use
+    export CONTROLS_REVERSED=$REVERSE_CONTROLS_ACTIVE
+    export SHIP_SHRINK_FACTOR=$(get_ship_scale)
+    export ASTEROID_SPEED_MULTIPLIER=$(get_asteroid_speed_multiplier)
+    export SCREEN_INVERTED=$INVERTED_SCREEN
 
     # Blink effect during punishment
-    if [ -n "${frame:-}" ] && [ $((frame % 7)) -eq 0 ]; then
-        safe_draw_ship
+    if [ "$PUNISHMENT_ACTIVE" -eq 1 ]; then
+        if [ -n "${frame:-}" ] && [ $((frame % 7)) -eq 0 ]; then
+            safe_draw_ship
+        fi
+        
+        # Countdown timer
+        PUNISHMENT_TIMER=$((PUNISHMENT_TIMER - 1))
+        
+        if [ "$PUNISHMENT_TIMER" -le 0 ]; then
+            # END SHORT-TERM PUNISHMENT
+            PUNISHMENT_ACTIVE=0
+            
+            # Restore original values
+            current_skin="$PUNISHMENT_OLD_SKIN"
+            safe_set_ship_speed "$current_ship" "$PUNISHMENT_OLD_SPEED"
+            ammo=$(safe_get_ship_ammo "$current_ship")
+            
+            # Clear short-term effects only
+            REVERSE_CONTROLS_ACTIVE=0
+            DRUNK_MODE_ACTIVE=0
+            RANDOM_TELEPORT_ACTIVE=0
+            SHRINKING_SHIP_ACTIVE=0
+            INVERTED_SCREEN=0
+            SUPER_SPEED_ASTEROIDS=0
+            
+            export CONTROLS_REVERSED=0
+            export SHIP_SHRINK_FACTOR=100
+            export ASTEROID_SPEED_MULTIPLIER=1
+            export SCREEN_INVERTED=0
+            
+            printf "${COLOR_GREEN:-\033[32m} ✓ Short-term punishment ended! ${COLOR_NEUTRAL:-\033[0m}\n"
+        fi
     fi
+}
 
-    # Countdown timer
-    PUNISHMENT_TIMER=$((PUNISHMENT_TIMER - 1))
+# ------------------------------
+# Apply movement with punishment effects
+# ------------------------------
+apply_punished_movement() {
+    local input="$1"
+    local processed_input
     
-    if [ "$PUNISHMENT_TIMER" -le 0 ]; then
-        # END PUNISHMENT
-        PUNISHMENT_ACTIVE=0
-        
-        # Restore original values
-        current_skin="$PUNISHMENT_OLD_SKIN"
-        safe_set_ship_speed "$current_ship" "$PUNISHMENT_OLD_SPEED"
-        ammo=$(safe_get_ship_ammo "$current_ship")
-        
-        # Clear all temporary effects
-        REVERSE_CONTROLS_ACTIVE=0
-        DRUNK_MODE_ACTIVE=0
-        RANDOM_TELEPORT_ACTIVE=0
-        SHRINKING_SHIP_ACTIVE=0
-        INVERTED_SCREEN=0
-        SUPER_SPEED_ASTEROIDS=0
-        export CONTROLS_REVERSED=0
-        export SHIP_SHRINK_FACTOR=100
-        export ASTEROID_SPEED_MULTIPLIER=1
-        
-        printf "${COLOR_GREEN:-\033[32m} ✓ Punishment ended! Try to be less terrible! ${COLOR_NEUTRAL:-\033[0m}\n"
-    fi
+    # Process input through reverse controls if active
+    processed_input=$(process_punishment_input "$input")
+    
+    # Apply the processed movement
+    case "$processed_input" in
+        w|W)
+            if [ "$ship_y" -gt 2 ]; then
+                ship_y=$((ship_y - 1))
+            fi
+            ;;
+        s|S)
+            if [ "$ship_y" -lt $((HEIGHT - 3)) ]; then
+                ship_y=$((ship_y + 1))
+            fi
+            ;;
+        a|A)
+            if [ "$ship_x" -gt 2 ]; then
+                ship_x=$((ship_x - 1))
+            fi
+            ;;
+        d|D)
+            if [ "$ship_x" -lt $((WIDTH - 10)) ]; then
+                ship_x=$((ship_x + 1))
+            fi
+            ;;
+    esac
+    
+    # Apply drunk drift after movement
+    apply_drunk_drift
 }
 
 # ------------------------------
