@@ -1,50 +1,47 @@
 """
 Star Runner — Punishments Module
-Handles long-term and temporary punishments
+Handles long-term punishments, timers, and effects that modify gameplay
 """
 
-# ------------------------------
-# Example punishment types
-# ------------------------------
+# Example punishment levels:
+# 0 = none, 1 = mild, 2 = moderate, 3 = severe
 
-PUNISHMENTS = {
-    "name_flip": {"active": False, "timer": 0},
-    "gender_swap": {"active": False, "timer": 0},
-    "score_penalty": {"active": False, "timer": 0, "amount": 50},
-}
-
-
-# ------------------------------
-# Apply punishment
-# ------------------------------
-
-def apply_punishment(state, profile, type_name):
-    """Activate a punishment type."""
-    if type_name in PUNISHMENTS:
-        pun = PUNISHMENTS[type_name]
-        pun["active"] = True
-        pun["timer"] = 100  # example duration (frames)
-
-        # Immediate effect example
-        if type_name == "name_flip":
-            profile["player_name"] = profile["player_name"][::-1]  # reverse name
-        elif type_name == "gender_swap":
-            if profile["player_gender"] == "male":
-                profile["player_gender"] = "female"
-            elif profile["player_gender"] == "female":
-                profile["player_gender"] = "male"
-        elif type_name == "score_penalty":
-            state["score"] = max(0, state["score"] - pun["amount"])
-
-
-# ------------------------------
-# Update long-term punishments
-# ------------------------------
+import time
 
 def check_long_term_punishment(profile):
-    """Decrement timers and remove expired punishments."""
-    for pun in PUNISHMENTS.values():
-        if pun["active"]:
-            pun["timer"] -= 1
-            if pun["timer"] <= 0:
-                pun["active"] = False
+    """
+    Apply punishments based on profile['punishment_level'].
+    Example:
+      - Reduce crystals per frame
+      - Force ship name change
+      - Permanent effects at high levels
+    """
+    level = profile.get("punishment_level", 0)
+    if level == 0:
+        return
+
+    # Example: crystals loss over time
+    if profile.get("crystals_bank", 0) > 0:
+        loss = level * 1  # 1,2,3 crystals per check
+        profile["crystals_bank"] -= min(loss, profile["crystals_bank"])
+
+    # Example: temporary stat penalty
+    if level >= 2:
+        profile["speed_multiplier_penalty"] = 1
+
+    # Example: permanent effect at high level
+    if level >= 3:
+        profile["permanent_name_change"] = True
+
+def apply_punishment_effects(state, profile):
+    """
+    Modify gameplay based on active punishments.
+    Should be called every frame.
+    """
+    # Apply speed penalty
+    penalty = profile.get("speed_multiplier_penalty", 0)
+    state["speed_multiplier"] = max(0, state["speed_multiplier"] - penalty)
+
+    # Example: forced gender/name change (if implemented)
+    if profile.get("permanent_name_change", False):
+        state["ship_name"] = "Punished Ship"

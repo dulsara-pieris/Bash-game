@@ -5,20 +5,33 @@ Star Runner — Main Entry Point (Python)
 
 import time
 import sys
+# Core modules
 from core.config import NUM_LINES, NUM_COLUMNS, COLOR_CYAN, COLOR_GREEN, COLOR_NEUTRAL
 from core.render import (
-    on_enter, on_exit, draw_border, draw_ship, draw_hud, draw_stars, move_cursor, colored
+    on_enter, on_exit, draw_border, draw_ship, draw_hud,
+    draw_stars, move_cursor, launch_sequence, colored, center_text
 )
 from core.input import handle_input
 from core.menu import show_main_menu
 from core.effects import launch_sequence
+
+# Player modules
 from player.profile import init_profile, save_profile
 from player.ships import get_ship_ammo
-from game.entities import spawn_asteroid, spawn_crystal, spawn_powerup, move_asteroids, move_crystal, move_powerup
+from player.skins import load_skins  # optional if you use skins
+
+# Game modules
+from game.entities import (
+    spawn_asteroid, spawn_crystal, spawn_powerup,
+    move_asteroids, move_crystal, move_powerup
+)
 from game.weapons import move_lasers, fire_laser, render_lasers
 from game.collision import check_collisions, check_laser_hits
-from game.punishments import check_long_term_punishment
+from game.punishments import check_long_term_punishment, apply_punishment_effects
 from game.inventory import update_career_stats, calculate_rank
+
+# Shop module
+from shop.shop import open_shop  # optional if using shop
 
 # ------------------------------
 # Game State

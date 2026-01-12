@@ -1,17 +1,13 @@
 """
 Star Runner — Inventory Module
-Tracks player career stats, collected crystals, and destroyed asteroids
+Tracks career stats, collected items, and high score
 """
-
-# ------------------------------
-# Inventory Updates
-# ------------------------------
 
 def update_career_stats(state, profile):
     """
-    Update career stats such as:
-    - total crystals collected
-    - total asteroids destroyed
+    Update career stats:
+    - total crystals
+    - total asteroids
     - high score
     """
     # Update high score
@@ -22,17 +18,12 @@ def update_career_stats(state, profile):
     profile["total_crystals"] = profile.get("total_crystals", 0) + state.get("crystals_collected", 0)
     profile["total_asteroids"] = profile.get("total_asteroids", 0) + state.get("asteroids_destroyed", 0)
 
-    # Update crystals bank
+    # Add collected crystals to crystals_bank
     profile["crystals_bank"] = profile.get("crystals_bank", 0) + state.get("crystals_collected", 0)
 
-    # Reset frame counters
+    # Reset per-frame counters
     state["crystals_collected"] = 0
     state["asteroids_destroyed"] = 0
-
-
-# ------------------------------
-# Rank Calculation
-# ------------------------------
 
 def calculate_rank(profile):
     """Return rank string based on high score."""
