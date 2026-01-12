@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 
-# STAR RUNNER - Enhanced Punishments Module (SUPER FUNNY EDITION)
+# STAR RUNNER - BRUTAL Punishments Module (MAXIMUM HUMILIATION)
 # Author: Dulsara Pieris (SYNAPSNEX)
-# Handles long-term and short-term punishments with hilarious extras
+# Handles long-term and short-term punishments - MUCH WORSE FOR LOSERS
 
 # ------------------------------
 # Config
 # ------------------------------
 LOW_SCORE_THRESHOLD=150
-PUNISHMENT_DURATION=50
-SUPER_PUNISHMENT_THRESHOLD=100  # Extra harsh below this score
+PUNISHMENT_DURATION=80  # Longer punishment
+SUPER_PUNISHMENT_THRESHOLD=100
+EXTREME_LOSER_THRESHOLD=50  # Ultimate humiliation
 
-# Short-term punishment
+# Short-term punishment state
 PUNISHMENT_ACTIVE=0
 PUNISHMENT_TIMER=0
+PUNISHMENT_OLD_SKIN=""
+PUNISHMENT_OLD_SPEED=0
 
 # Long-term punishment (persisted)
 punishment_level=${punishment_level:-0}
@@ -27,34 +30,35 @@ punishment_backup_skin="${punishment_backup_skin:-}"
 punishment_backup_ship="${punishment_backup_ship:-}"
 punishment_backup_ammo="${punishment_backup_ammo:-}"
 
-# Expanded funny names with more variety
-FUNNY_NAMES=(
-    "AsteroidMagnet" "NoobSauce" "TrashPilot" "SpacePeasant" 
-    "NeuralTrash" "OopsiePilot" "FailCaptain" "CrashDummy"
-    "StellarLoser" "CosmicClown" "OrbitIdiot" "GalaxyGarbage"
-    "StarScrub" "NebulaNincompoop" "VoidVillain" "QuasarQuitter"
-    "PlanetPeon" "MeteorMoron" "CometCadet" "LunarLunatic"
+# BRUTAL punishment names
+LOSER_NAMES=(
+    "TotalTrash" "EpicFailure" "DisasterPilot" "CrashMaster"
+    "SpaceGarbage" "CosmicWaste" "StellarIdiot" "GalaxyShame"
+    "AsteroidFood" "NebulaNoob" "VoidLoser" "QuasarQuitter"
+    "TrashCompactor" "FailFactory" "DisasterClass" "WorthlessWreck"
+    "AbsoluteGarbage" "CompleteWaste" "TotalEmbarrassment" "UltimateFailure"
 )
 
-# Expanded funny titles
-FUNNY_TITLES=(
-    "Lord of Fails" "Duke of Disasters" "Baron of Blunders"
-    "Count of Crashes" "Prince of Poor Plays" "Knight of Nonsense"
-    "Supreme Scrub" "Master of Mistakes" "Champion of Chaos"
-    "Warden of Wrecks" "Admiral of Accidents" "General of Goofs"
+# HUMILIATING titles
+LOSER_TITLES=(
+    "the Pathetic" "the Worthless" "the Incompetent" "the Disaster"
+    "the Failure" "the Embarrassment" "the Joke" "the Laughingstock"
+    "the Useless" "the Hopeless" "the Terrible" "the Abysmal"
+    "the Disgraceful" "the Shameful" "the Pitiful" "the Deplorable"
 )
 
 PUNISHMENT_SKINS=(5 4 3)
 
-# Super punishment effects
-REVERSE_CONTROLS=0
-DRUNK_MODE=0
-UPSIDE_DOWN=0
-RANDOM_TELEPORT=0
-SHRINKING_SHIP=0
+# Super punishment effects (ACTUALLY WORKING)
+REVERSE_CONTROLS_ACTIVE=0
+DRUNK_MODE_ACTIVE=0
+RANDOM_TELEPORT_ACTIVE=0
+SHRINKING_SHIP_ACTIVE=0
+INVERTED_SCREEN=0
+SUPER_SPEED_ASTEROIDS=0
 
 # ------------------------------
-# Backup original profile before long-term punishment
+# Backup original profile
 # ------------------------------
 backup_profile_for_punishment() {
     if [ -z "$punishment_backup_name" ]; then
@@ -68,7 +72,7 @@ backup_profile_for_punishment() {
 }
 
 # ------------------------------
-# Restore profile after long-term punishment expires
+# Restore profile after punishment expires
 # ------------------------------
 restore_profile_after_punishment() {
     player_name="$punishment_backup_name"
@@ -78,7 +82,7 @@ restore_profile_after_punishment() {
     current_ship="$punishment_backup_ship"
     ammo="$punishment_backup_ammo"
 
-    # Clear punishment state
+    # Clear ALL punishment state
     punishment_level=0
     punishment_expires=0
     punishment_backup_name=""
@@ -88,147 +92,182 @@ restore_profile_after_punishment() {
     punishment_backup_ship=""
     punishment_backup_ammo=""
 
-    # Reset super punishments
-    REVERSE_CONTROLS=0
-    DRUNK_MODE=0
-    UPSIDE_DOWN=0
-    RANDOM_TELEPORT=0
-    SHRINKING_SHIP=0
+    # Reset effects
+    REVERSE_CONTROLS_ACTIVE=0
+    DRUNK_MODE_ACTIVE=0
+    RANDOM_TELEPORT_ACTIVE=0
+    SHRINKING_SHIP_ACTIVE=0
+    INVERTED_SCREEN=0
+    SUPER_SPEED_ASTEROIDS=0
 
     save_profile
-    printf "$COLOR_GREEN ✓ Your profile has been restored to normal! $COLOR_NEUTRAL\n"
+    printf "$COLOR_GREEN ✓ Punishment expired! Profile restored. Don't mess up again! $COLOR_NEUTRAL\n"
 }
 
 # ------------------------------
-# Apply long-term punishment with escalating hilarity
+# Apply BRUTAL long-term punishment
 # ------------------------------
 apply_long_term_punishment() {
+    local current_time
     current_time=$(date +%s)
     punishment_level=${punishment_level:-0}
 
     # Backup original profile if first punishment
     if [ -z "$punishment_backup_name" ]; then
         backup_profile_for_punishment
-        last_flip_gender="$player_gender"
     fi
 
-    # Check if punishment is active (escalate)
+    # Check if punishment is active (ESCALATE HARD)
     if [ "$punishment_expires" -gt "$current_time" ]; then
         punishment_level=$((punishment_level + 1))
 
-        # Duration doubles each time
-        prev_days=${punishment_prev_days:-3}
-        days=$(( prev_days * 2 ))
+        # Duration TRIPLES each time (gets MUCH worse)
+        local prev_days=${punishment_prev_days:-3}
+        local days=$(( prev_days * 3 ))
+        [ "$days" -gt 90 ] && days=90  # Cap at 90 days max
         punishment_prev_days=$days
         punishment_expires=$((current_time + days*24*60*60))
 
-        # Flip gender based on last applied flip
-        case "$last_flip_gender" in
+        # INVERT gender from ORIGINAL backup (not current)
+        case "$punishment_backup_gender" in
             "Male")
                 player_gender="Female"
-                player_title="Madam ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-                last_flip_gender="Female"
+                player_title="Lady ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
                 ;;
             "Female")
                 player_gender="Male"
-                player_title="Sir ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-                last_flip_gender="Male"
+                player_title="Lord ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
                 ;;
             *)
                 player_gender="Alien"
-                player_title="Mx ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-                last_flip_gender="Alien"
+                player_title="Entity ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
                 ;;
         esac
 
-        # Get increasingly ridiculous name
-        player_name="${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}"
+        # Progressively WORSE names
+        local base_name="${LOSER_NAMES[$RANDOM % ${#LOSER_NAMES[@]}]}"
         
-        # Add numbers for extra humiliation at high levels
-        if [ "$punishment_level" -ge 2 ]; then
-            player_name="${player_name}$RANDOM"
-        fi
-        
-        if [ "$punishment_level" -ge 4 ]; then
-            player_name="${player_name}_THE_WORST"
+        if [ "$punishment_level" -eq 2 ]; then
+            player_name="${base_name}9000"
+        elif [ "$punishment_level" -eq 3 ]; then
+            player_name="xXx_${base_name}_xXx"
+        elif [ "$punishment_level" -eq 4 ]; then
+            player_name="💩${base_name}💩"
+        elif [ "$punishment_level" -ge 5 ]; then
+            player_name="☠ULTIMATE_${base_name}_666☠"
+        else
+            player_name="$base_name"
         fi
 
-        # Apply ugly skin, weakest ship, low ammo
+        # BRUTAL equipment downgrades
         current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
-        current_ship=1
-        ammo=$((ammo / 2))
+        current_ship=1  # Worst ship always
+        ammo=$((ammo / 3))
         [ "$ammo" -lt 1 ] && ammo=1
 
-        # Make name permanent if level >= 3
+        # Make name PERMANENT if level >= 3 (BRUTAL)
         if [ "$punishment_level" -ge 3 ]; then
             punishment_backup_name="$player_name"
+            printf "$COLOR_RED ☠ YOUR SHAMEFUL NAME IS NOW PERMANENT! ☠ $COLOR_NEUTRAL\n"
         fi
 
-        # Activate super punishments at higher levels
+        # Activate PROGRESSIVE super punishments
+        REVERSE_CONTROLS_ACTIVE=0
+        DRUNK_MODE_ACTIVE=0
+        RANDOM_TELEPORT_ACTIVE=0
+        SHRINKING_SHIP_ACTIVE=0
+        INVERTED_SCREEN=0
+        SUPER_SPEED_ASTEROIDS=0
+
         if [ "$punishment_level" -ge 2 ]; then
-            REVERSE_CONTROLS=1
+            REVERSE_CONTROLS_ACTIVE=1
         fi
         if [ "$punishment_level" -ge 3 ]; then
-            DRUNK_MODE=1
+            DRUNK_MODE_ACTIVE=1
+            SUPER_SPEED_ASTEROIDS=1
         fi
         if [ "$punishment_level" -ge 4 ]; then
-            RANDOM_TELEPORT=1
+            RANDOM_TELEPORT_ACTIVE=1
+            INVERTED_SCREEN=1
         fi
         if [ "$punishment_level" -ge 5 ]; then
-            SHRINKING_SHIP=1
-            printf "$COLOR_RED ☠ MAXIMUM PUNISHMENT! You are the shame of the galaxy! ☠ $COLOR_NEUTRAL\n"
+            SHRINKING_SHIP_ACTIVE=1
+            # MAXIMUM PUNISHMENT - reduce speed to 1
+            set_ship_speed "$current_ship" 1
+            printf "$COLOR_RED\n"
+            printf "╔═══════════════════════════════════════════╗\n"
+            printf "║  ☠ MAXIMUM PUNISHMENT ACTIVATED ☠        ║\n"
+            printf "║  YOU ARE THE WORST PILOT IN THE GALAXY!  ║\n"
+            printf "║  SHAME! SHAME! SHAME!                    ║\n"
+            printf "╚═══════════════════════════════════════════╝\n"
+            printf "$COLOR_NEUTRAL\n"
         fi
 
         save_profile
-        printf "$COLOR_RED ⚠ Punishment ESCALATED! Level: $punishment_level\n"
-        printf "   Name: $player_name | Title: $player_title\n"
-        printf "   Gender: $player_gender | Duration: $days day(s)\n"
-        [ "$REVERSE_CONTROLS" -eq 1 ] && printf "   💀 REVERSE CONTROLS ACTIVE!\n"
-        [ "$DRUNK_MODE" -eq 1 ] && printf "   🍺 DRUNK MODE ACTIVE!\n"
-        [ "$RANDOM_TELEPORT" -eq 1 ] && printf "   🌀 RANDOM TELEPORTS ACTIVE!\n"
-        [ "$SHRINKING_SHIP" -eq 1 ] && printf "   📉 SHRINKING SHIP ACTIVE!\n"
-        printf "$COLOR_NEUTRAL"
+        
+        printf "$COLOR_RED\n"
+        printf "⚠⚠⚠ PUNISHMENT ESCALATED TO LEVEL $punishment_level ⚠⚠⚠\n"
+        printf "╔═══════════════════════════════════════════╗\n"
+        printf "║ Name: %-37s ║\n" "$player_name"
+        printf "║ Title: %-36s ║\n" "$player_title"
+        printf "║ Gender: %-35s ║\n" "$player_gender"
+        printf "║ Duration: %-32s ║\n" "$days day(s)"
+        printf "║ Ammo: %-36s ║\n" "$ammo"
+        printf "╠═══════════════════════════════════════════╣\n"
+        [ "$REVERSE_CONTROLS_ACTIVE" -eq 1 ] && printf "║ 🔄 REVERSE CONTROLS ACTIVE                ║\n"
+        [ "$DRUNK_MODE_ACTIVE" -eq 1 ] && printf "║ 🍺 DRUNK MODE ACTIVE                      ║\n"
+        [ "$RANDOM_TELEPORT_ACTIVE" -eq 1 ] && printf "║ 🌀 RANDOM TELEPORTS ACTIVE                ║\n"
+        [ "$SHRINKING_SHIP_ACTIVE" -eq 1 ] && printf "║ 📉 SHRINKING SHIP ACTIVE                  ║\n"
+        [ "$INVERTED_SCREEN" -eq 1 ] && printf "║ 🙃 INVERTED SCREEN ACTIVE                 ║\n"
+        [ "$SUPER_SPEED_ASTEROIDS" -eq 1 ] && printf "║ ⚡ SUPER SPEED ASTEROIDS ACTIVE           ║\n"
+        printf "╚═══════════════════════════════════════════╝\n"
+        printf "$COLOR_NEUTRAL\n"
+        
         return
     fi
 
-    # First-time punishment
+    # FIRST-TIME PUNISHMENT
     punishment_level=1
-    days=3
+    local days=3
     punishment_prev_days=$days
     punishment_expires=$((current_time + days*24*60*60))
 
-    # Flip gender (opposite of current)
-    case "$player_gender" in
-        "Male") 
+    # Invert gender from ORIGINAL backup
+    case "$punishment_backup_gender" in
+        "Male")
             player_gender="Female"
-            player_title="Madam ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-            last_flip_gender="Female"
+            player_title="Lady ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
             ;;
         "Female")
             player_gender="Male"
-            player_title="Sir ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-            last_flip_gender="Male"
+            player_title="Lord ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
             ;;
         *)
             player_gender="Alien"
-            player_title="Mx ${FUNNY_TITLES[$RANDOM % ${#FUNNY_TITLES[@]}]}"
-            last_flip_gender="Alien"
+            player_title="Entity ${LOSER_TITLES[$RANDOM % ${#LOSER_TITLES[@]}]}"
             ;;
     esac
 
-    # Ugly skin, weak ship, low ammo
-    player_name=${FUNNY_NAMES[$RANDOM % ${#FUNNY_NAMES[@]}]}
+    # First punishment name and equipment
+    player_name="${LOSER_NAMES[$RANDOM % ${#LOSER_NAMES[@]}]}"
     current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
     current_ship=1
     ammo=$((ammo / 2))
     [ "$ammo" -lt 1 ] && ammo=1
 
     save_profile
-    printf "$COLOR_RED ⚠ PUNISHMENT APPLIED!\n"
-    printf "   Duration: $days day(s) | Level: $punishment_level\n"
-    printf "   Name: $player_name | Title: $player_title\n"
-    printf "   Gender: $player_gender\n"
-    printf "   May this teach you to play better! $COLOR_NEUTRAL\n"
+    
+    printf "$COLOR_RED\n"
+    printf "╔═══════════════════════════════════════════╗\n"
+    printf "║    ⚠ PUNISHMENT ACTIVATED ⚠              ║\n"
+    printf "║ You have brought shame upon yourself!    ║\n"
+    printf "╠═══════════════════════════════════════════╣\n"
+    printf "║ Duration: $days days | Level: $punishment_level                  ║\n"
+    printf "║ Name: %-37s ║\n" "$player_name"
+    printf "║ Title: %-36s ║\n" "$player_title"
+    printf "║ Gender: %-35s ║\n" "$player_gender"
+    printf "╚═══════════════════════════════════════════╝\n"
+    printf "$COLOR_NEUTRAL\n"
 }
 
 # ------------------------------
@@ -237,188 +276,284 @@ apply_long_term_punishment() {
 check_long_term_punishment() {
     local current_time
     current_time=$(date +%s)
-    if [ "$punishment_expires" -le "$current_time" ] && [ -n "$punishment_backup_name" ]; then
+    if [ "$punishment_expires" -gt 0 ] && [ "$punishment_expires" -le "$current_time" ] && [ -n "$punishment_backup_name" ]; then
         restore_profile_after_punishment
     fi
 }
 
 # ------------------------------
-# Short-term chaos punishment with variety
+# BRUTAL short-term chaos punishment
 # ------------------------------
 apply_short_punishment() {
     if [ "$PUNISHMENT_ACTIVE" -eq 1 ]; then return; fi
+    
     PUNISHMENT_ACTIVE=1
     PUNISHMENT_TIMER=$PUNISHMENT_DURATION
 
-    # Random punishment message
+    # Insult messages
     local messages=(
-        "✗ Git gud scrub!"
-        "✗ Even asteroids are embarrassed for you!"
-        "✗ Your ancestors weep!"
-        "✗ The galaxy laughs at your failure!"
-        "✗ Have you tried NOT crashing?"
-        "✗ My grandma flies better than this!"
-        "✗ Achievement Unlocked: Total Disaster!"
+        "✗ PATHETIC! Even space debris flies better!"
+        "✗ Your ancestors are ASHAMED!"
+        "✗ The galaxy mocks your incompetence!"
+        "✗ DISGRACEFUL PERFORMANCE!"
+        "✗ Are you TRYING to fail?!"
+        "✗ A TRAINED MONKEY could do better!"
+        "✗ WORTHLESS PILOT DETECTED!"
+        "✗ GARBAGE! ABSOLUTE GARBAGE!"
     )
     printf "\n$COLOR_RED ${messages[$RANDOM % ${#messages[@]}]} $COLOR_NEUTRAL\n"
 
-    # Reduce ship speed
-    local original_speed
-    original_speed=$(get_ship_speed "$current_ship")
-    local new_speed=$((original_speed - 2))  # Harsher now
+    # Save original values
+    PUNISHMENT_OLD_SKIN="$current_skin"
+    PUNISHMENT_OLD_SPEED=$(get_ship_speed "$current_ship")
+
+    # HARSH penalties
+    local new_speed=$((PUNISHMENT_OLD_SPEED - 2))
     [ "$new_speed" -lt 1 ] && new_speed=1
     set_ship_speed "$current_ship" "$new_speed"
 
-    # Reduce ammo more severely
-    ammo=$((ammo / 3))
+    # Brutal ammo reduction
+    ammo=$((ammo / 4))
     [ "$ammo" -lt 1 ] && ammo=1
 
-    # Multiple visual effects
+    # Visual punishment
     blink_ship_effect
     shake_screen_effect
 
-    # Spawn extra asteroids (more if score is really bad)
-    local asteroid_count=5
+    # Spawn MANY asteroids based on how bad you are
+    local asteroid_count=8
     if [ "$score" -lt "$SUPER_PUNISHMENT_THRESHOLD" ]; then
-        asteroid_count=10
-        printf "$COLOR_RED ☠ SUPER PUNISHMENT! ☠ $COLOR_NEUTRAL\n"
+        asteroid_count=15
+        printf "$COLOR_RED ☠ SUPER PUNISHMENT ACTIVATED! ☠ $COLOR_NEUTRAL\n"
     fi
-    for i in $(seq 1 $asteroid_count); do spawn_asteroid; done
+    if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
+        asteroid_count=25
+        printf "$COLOR_RED\n"
+        printf "╔═══════════════════════════════════════════╗\n"
+        printf "║ ☠☠☠ EXTREME LOSER DETECTED! ☠☠☠          ║\n"
+        printf "║ YOU ARE A DISGRACE TO ALL PILOTS!        ║\n"
+        printf "╚═══════════════════════════════════════════╝\n"
+        printf "$COLOR_NEUTRAL\n"
+    fi
+    
+    for i in $(seq 1 $asteroid_count); do
+        spawn_asteroid
+    done
 
-    # Force ugly skin temporarily
-    old_skin="$current_skin"
-    current_skin=${PUNISHMENT_SKINS[$RANDOM % ${#PUNISHMENT_SKINS[@]}]}
+    # Force ugliest skin
+    current_skin=5
 
-    # Random extra punishments
-    case $((RANDOM % 4)) in
-        0) UPSIDE_DOWN=1; printf "$COLOR_YELLOW 🙃 Ship is upside down! $COLOR_NEUTRAL\n" ;;
-        1) REVERSE_CONTROLS=1; printf "$COLOR_YELLOW ⬅➡ Controls reversed! $COLOR_NEUTRAL\n" ;;
-        2) DRUNK_MODE=1; printf "$COLOR_YELLOW 🍺 Drunk mode activated! $COLOR_NEUTRAL\n" ;;
-        3) SHRINKING_SHIP=1; printf "$COLOR_YELLOW 📉 Ship is shrinking! $COLOR_NEUTRAL\n" ;;
+    # Activate random BRUTAL effects
+    local effect=$((RANDOM % 6))
+    case $effect in
+        0)
+            INVERTED_SCREEN=1
+            printf "$COLOR_YELLOW 🙃 SCREEN INVERTED! $COLOR_NEUTRAL\n"
+            ;;
+        1)
+            REVERSE_CONTROLS_ACTIVE=1
+            printf "$COLOR_YELLOW ⬅➡ CONTROLS REVERSED! $COLOR_NEUTRAL\n"
+            ;;
+        2)
+            DRUNK_MODE_ACTIVE=1
+            printf "$COLOR_YELLOW 🍺 DRUNK MODE! $COLOR_NEUTRAL\n"
+            ;;
+        3)
+            SHRINKING_SHIP_ACTIVE=1
+            printf "$COLOR_YELLOW 📉 SHIP SHRINKING! $COLOR_NEUTRAL\n"
+            ;;
+        4)
+            RANDOM_TELEPORT_ACTIVE=1
+            printf "$COLOR_YELLOW 🌀 RANDOM TELEPORTS! $COLOR_NEUTRAL\n"
+            ;;
+        5)
+            SUPER_SPEED_ASTEROIDS=1
+            printf "$COLOR_YELLOW ⚡ SUPER SPEED ASTEROIDS! $COLOR_NEUTRAL\n"
+            ;;
     esac
 }
 
 # ------------------------------
-# Punishment tick (call per frame)
+# Punishment tick - ACTUALLY APPLY EFFECTS
 # ------------------------------
 punishment_tick() {
-    if [ "$PUNISHMENT_ACTIVE" -eq 1 ]; then
-        # Blink effect
-        [ $((frame % 5)) -eq 0 ] && draw_ship
+    if [ "$PUNISHMENT_ACTIVE" -eq 0 ]; then
+        return
+    fi
 
-        # Drunk mode - random position shifts
-        if [ "$DRUNK_MODE" -eq 1 ] && [ $((frame % 3)) -eq 0 ]; then
-            ship_y=$((ship_y + (RANDOM % 3 - 1)))
-            ship_x=$((ship_x + (RANDOM % 3 - 1)))
+    # Apply REVERSE CONTROLS (swap input handling)
+    if [ "$REVERSE_CONTROLS_ACTIVE" -eq 1 ]; then
+        # This needs to be handled in main game loop input section
+        # Set flag for input reversal
+        export CONTROLS_REVERSED=1
+    fi
+
+    # Apply DRUNK MODE - random jerky movements
+    if [ "$DRUNK_MODE_ACTIVE" -eq 1 ]; then
+        if [ $((RANDOM % 4)) -eq 0 ]; then
+            local drift=$((RANDOM % 3 - 1))
+            ship_y=$((ship_y + drift))
+            ship_x=$((ship_x + drift))
+            # Boundary check
+            [ "$ship_y" -lt 2 ] && ship_y=2
+            [ "$ship_y" -gt $((HEIGHT - 3)) ] && ship_y=$((HEIGHT - 3))
+            [ "$ship_x" -lt 2 ] && ship_x=2
+            [ "$ship_x" -gt $((WIDTH - 10)) ] && ship_x=$((WIDTH - 10))
         fi
+    fi
 
-        # Random teleport
-        if [ "$RANDOM_TELEPORT" -eq 1 ] && [ $((RANDOM % 20)) -eq 0 ]; then
-            ship_x=$((RANDOM % (WIDTH - 10) + 5))
-            ship_y=$((RANDOM % (HEIGHT - 5) + 3))
+    # Apply RANDOM TELEPORT - actually teleport the ship
+    if [ "$RANDOM_TELEPORT_ACTIVE" -eq 1 ]; then
+        if [ $((RANDOM % 30)) -eq 0 ]; then
+            ship_x=$((RANDOM % (WIDTH - 15) + 5))
+            ship_y=$((RANDOM % (HEIGHT - 8) + 4))
             printf "$COLOR_YELLOW ⚡ TELEPORTED! $COLOR_NEUTRAL\n"
+            blink_ship_effect
         fi
+    fi
 
-        PUNISHMENT_TIMER=$((PUNISHMENT_TIMER - 1))
-        if [ "$PUNISHMENT_TIMER" -le 0 ]; then
-            PUNISHMENT_ACTIVE=0
-            ammo=$(get_ship_ammo "$current_ship")
-            set_ship_speed "$current_ship" "$(get_ship_speed "$current_ship")"
-            current_skin="$old_skin"
-            
-            # Clear temporary effects
-            REVERSE_CONTROLS=0
-            DRUNK_MODE=0
-            UPSIDE_DOWN=0
-            RANDOM_TELEPORT=0
-            SHRINKING_SHIP=0
-            
-            printf "$COLOR_GREEN ✓ Chaos punishment ended! Try to do better! $COLOR_NEUTRAL\n"
-        fi
+    # Apply SHRINKING SHIP - reduce ship size temporarily
+    if [ "$SHRINKING_SHIP_ACTIVE" -eq 1 ]; then
+        export SHIP_SHRINK_FACTOR=$((50 + (PUNISHMENT_TIMER % 50)))
+    else
+        export SHIP_SHRINK_FACTOR=100
+    fi
+
+    # Apply SUPER SPEED ASTEROIDS - increase asteroid speed
+    if [ "$SUPER_SPEED_ASTEROIDS" -eq 1 ]; then
+        export ASTEROID_SPEED_MULTIPLIER=3
+    else
+        export ASTEROID_SPEED_MULTIPLIER=1
+    fi
+
+    # Blink effect during punishment
+    if [ $((frame % 7)) -eq 0 ]; then
+        draw_ship
+    fi
+
+    # Countdown timer
+    PUNISHMENT_TIMER=$((PUNISHMENT_TIMER - 1))
+    
+    if [ "$PUNISHMENT_TIMER" -le 0 ]; then
+        # END PUNISHMENT
+        PUNISHMENT_ACTIVE=0
+        
+        # Restore original values
+        current_skin="$PUNISHMENT_OLD_SKIN"
+        set_ship_speed "$current_ship" "$PUNISHMENT_OLD_SPEED"
+        ammo=$(get_ship_ammo "$current_ship")
+        
+        # Clear all temporary effects
+        REVERSE_CONTROLS_ACTIVE=0
+        DRUNK_MODE_ACTIVE=0
+        RANDOM_TELEPORT_ACTIVE=0
+        SHRINKING_SHIP_ACTIVE=0
+        INVERTED_SCREEN=0
+        SUPER_SPEED_ASTEROIDS=0
+        export CONTROLS_REVERSED=0
+        export SHIP_SHRINK_FACTOR=100
+        export ASTEROID_SPEED_MULTIPLIER=1
+        
+        printf "$COLOR_GREEN ✓ Punishment ended! Try to be less terrible! $COLOR_NEUTRAL\n"
     fi
 }
 
 # ------------------------------
-# Blink ship effect
+# Visual effects
 # ------------------------------
 blink_ship_effect() {
-    for i in {1..3}; do
-        clear
-        draw_border
-        sleep 0.1
+    for i in {1..4}; do
+        tput cup "$ship_y" "$ship_x"
+        printf "   "
+        sleep 0.08
         draw_ship
-        sleep 0.1
+        sleep 0.08
     done
 }
 
-# ------------------------------
-# Shake screen effect (new!)
-# ------------------------------
 shake_screen_effect() {
-    for i in {1..5}; do
-        tput cup $((RANDOM % 3)) $((RANDOM % 3))
-        sleep 0.05
+    for i in {1..8}; do
+        tput cup $((RANDOM % 4)) $((RANDOM % 4))
+        sleep 0.04
     done
     tput cup 0 0
 }
 
 # ------------------------------
-# Insult generator for extra humiliation
+# Insult generator
 # ------------------------------
 generate_insult() {
     local insults=(
-        "You fly like a concussed space slug!"
-        "My coffee maker has better reflexes!"
-        "Are you TRYING to hit every asteroid?"
-        "I've seen better piloting from a potato!"
-        "Your ship's AI is considering resignation!"
-        "The asteroids are AVOIDING you out of pity!"
-        "Your flight recorder just filed for therapy!"
-        "Houston, we have a competence problem!"
-        "Space janitors fly better than this!"
-        "Your mother was a hamster and your father smelt of elderberries!"
+        "You're a DISGRACE to all pilots!"
+        "My TOASTER flies better than you!"
+        "Are you BLIND or just INCOMPETENT?"
+        "The asteroids are EMBARRASSED for you!"
+        "PATHETIC! Absolutely PATHETIC!"
+        "You should be BANNED from flying!"
+        "WORST. PILOT. EVER."
+        "Your flight school wants a REFUND!"
+        "Even SPACE DEBRIS has better aim!"
+        "SHAMEFUL! Your family weeps!"
+        "Git gud, SCRUB!"
+        "You're making EVERYONE look bad!"
     )
-    printf "$COLOR_RED ${insults[$RANDOM % ${#insults[@]}]} $COLOR_NEUTRAL\n"
+    printf "$COLOR_RED ► ${insults[$RANDOM % ${#insults[@]}]} $COLOR_NEUTRAL\n"
 }
 
 # ------------------------------
-# Trigger punishments if score is low
+# Main punishment trigger
 # ------------------------------
 check_low_score_punishment() {
     if [ "$score" -lt "$LOW_SCORE_THRESHOLD" ]; then
         apply_short_punishment
         apply_long_term_punishment
         
-        # Extra insult if really bad
+        # Extra insults for terrible players
         if [ "$score" -lt "$SUPER_PUNISHMENT_THRESHOLD" ]; then
+            generate_insult
+        fi
+        
+        if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
+            generate_insult
             generate_insult
         fi
     fi
 }
 
 # ------------------------------
-# Hall of Shame (track worst performances)
+# Hall of Shame
 # ------------------------------
-declare -A HALL_OF_SHAME
 SHAME_FILE="${GAME_DIR}/.hall_of_shame"
 
 add_to_hall_of_shame() {
     local shame_score=$1
     local shame_name=$2
-    echo "$shame_score|$shame_name|$(date +%Y-%m-%d)" >> "$SHAME_FILE"
-    printf "$COLOR_RED 📜 You've been added to the Hall of Shame! $COLOR_NEUTRAL\n"
+    echo "$shame_score|$shame_name|$(date '+%Y-%m-%d %H:%M')" >> "$SHAME_FILE"
+    printf "$COLOR_RED\n"
+    printf "╔═══════════════════════════════════════════╗\n"
+    printf "║  📜 ADDED TO HALL OF SHAME! 📜            ║\n"
+    printf "║  Your failure is now PERMANENT!          ║\n"
+    printf "╚═══════════════════════════════════════════╝\n"
+    printf "$COLOR_NEUTRAL\n"
 }
 
 show_hall_of_shame() {
     if [ -f "$SHAME_FILE" ]; then
-        printf "\n$COLOR_RED === HALL OF SHAME === $COLOR_NEUTRAL\n"
-        sort -t'|' -k1 -n "$SHAME_FILE" | head -10 | while IFS='|' read -r score name date; do
-            printf "$COLOR_YELLOW Score: $score | $name | $date $COLOR_NEUTRAL\n"
+        printf "\n$COLOR_RED"
+        printf "╔═══════════════════════════════════════════╗\n"
+        printf "║         HALL OF SHAME (Top 10)           ║\n"
+        printf "╠═══════════════════════════════════════════╣\n"
+        sort -t'|' -k1 -n "$SHAME_FILE" | head -10 | while IFS='|' read -r score name datetime; do
+            printf "║ %-5s | %-20s | %-10s ║\n" "$score" "${name:0:20}" "${datetime:0:10}"
         done
+        printf "╚═══════════════════════════════════════════╝\n"
+        printf "$COLOR_NEUTRAL\n"
     fi
 }
 
-# Add to shame if score is really terrible
-if [ "$score" -lt 50 ] && [ "$game_over" -eq 1 ]; then
-    add_to_hall_of_shame "$score" "$player_name"
-fi
+# Auto-add to shame on game over if score is terrible
+check_and_add_to_shame() {
+    if [ "$score" -lt "$EXTREME_LOSER_THRESHOLD" ]; then
+        add_to_hall_of_shame "$score" "$player_name"
+    fi
+}
